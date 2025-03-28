@@ -1,11 +1,11 @@
 from nomad.config.models.plugins import AppEntryPoint
 from nomad.config.models.ui import App, Column, Columns, FilterMenu, FilterMenus
 
-app_entry_point = AppEntryPoint(
-    name='NewApp',
-    description='New app entry point configuration.',
+nmr_app = AppEntryPoint(
+    name='NmrApp',
+    description='NMR app entry point configuration.',
     app=App(
-        label='NewApp',
+        label='NMR App',
         path='app',
         category='simulation',
         columns=Columns(
