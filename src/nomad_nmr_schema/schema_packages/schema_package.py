@@ -7,7 +7,6 @@ if TYPE_CHECKING:
     from nomad.metainfo import Context, Section
     from structlog.stdlib import BoundLogger
 
-from nomad.datamodel.data import EntryData
 from nomad.datamodel.metainfo.basesections import Entity
 from nomad.metainfo import MEnum, Quantity, SchemaPackage, Section, SubSection
 from nomad_simulations.schema_packages.atoms_state import AtomsState
@@ -190,12 +189,12 @@ class ElectricFieldGradient(PhysicalProperty):
         """,
     )
 
-    def __init__(
-        self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
-    ) -> None:
-        super().__init__(m_def, m_context, **kwargs)
-        self.rank = [3, 3]  # ! move this to definitions
-        #self.name = self.m_def.name
+    # def __init__(
+    #     self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
+    # ) -> None:
+    #     super().__init__(m_def, m_context, **kwargs)
+    #     self.rank = [3, 3]  # ! move this to definitions  !!! TODO
+    #     self.name = self.m_def.name
 
     def resolve_quadrupolar_coupling_constant(self, logger: 'BoundLogger') -> None:
         pass
