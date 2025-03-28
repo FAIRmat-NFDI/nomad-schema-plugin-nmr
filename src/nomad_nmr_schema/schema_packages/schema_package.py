@@ -195,7 +195,7 @@ class ElectricFieldGradient(PhysicalProperty):
     ) -> None:
         super().__init__(m_def, m_context, **kwargs)
         self.rank = [3, 3]  # ! move this to definitions
-        self.name = self.m_def.name
+        #self.name = self.m_def.name
 
     def resolve_quadrupolar_coupling_constant(self, logger: 'BoundLogger') -> None:
         pass
@@ -214,13 +214,6 @@ class ElectricFieldGradient(PhysicalProperty):
         # TODO add normalization to extract `quadrupolar_coupling_constant`
         # and `asymmetry_parameter`
 
-
-class TestElectricFieldGradient(ElectricFieldGradient, EntryData):
-    """
-    Test class for the ElectricFieldGradient class.
-    """
-
-    pass
 
 class ElectricFieldGradients(BaseOutputs):
     """
