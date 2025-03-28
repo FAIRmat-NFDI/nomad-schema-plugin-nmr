@@ -112,9 +112,9 @@ where = ["src"]
 
 [project.entry-points.'nomad.plugin']
 
-schema_package_entry_point = "nomad_nmr_schema.schema_packages:schema_package_entry_point"
+nmr_schema = "nomad_nmr_schema.schema_packages:nmr_schema"
 
-app_entry_point = "nomad_nmr_schema.apps:app_entry_point"
+nmr_app = "nomad_nmr_schema.apps:nmr_app"
 
 [tool.cruft]
 # Avoid updating workflow files, this leads to permissions issues
