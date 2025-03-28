@@ -7,6 +7,7 @@ if TYPE_CHECKING:
     from nomad.metainfo import Context, Section
     from structlog.stdlib import BoundLogger
 
+from nomad.datamodel.data import EntryData
 from nomad.datamodel.metainfo.basesections import Entity
 from nomad.metainfo import MEnum, Quantity, SchemaPackage, Section, SubSection
 from nomad_simulations.schema_packages.atoms_state import AtomsState
@@ -213,6 +214,13 @@ class ElectricFieldGradient(PhysicalProperty):
         # TODO add normalization to extract `quadrupolar_coupling_constant`
         # and `asymmetry_parameter`
 
+
+class TestElectricFieldGradient(ElectricFieldGradient, EntryData):
+    """
+    Test class for the ElectricFieldGradient class.
+    """
+
+    pass
 
 class ElectricFieldGradients(BaseOutputs):
     """
