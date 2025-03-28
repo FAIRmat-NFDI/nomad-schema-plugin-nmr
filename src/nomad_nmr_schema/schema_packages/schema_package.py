@@ -212,7 +212,7 @@ class ElectricFieldGradient(PhysicalProperty):
 
 class ElectricFieldGradients(BaseOutputs):
     """
-    Represents the electric field gradients (EFG) data extracted from a magres file.
+    Represents the electric field gradients (EFG) data.
 
     This class contains the total, local, and non-local components of the electric field gradients.
     Each component is represented as a subsection of the ElectricFieldGradient class and can have multiple entries.
@@ -367,7 +367,7 @@ class MagneticSusceptibility(PhysicalProperty):
 
 class Outputs(BaseOutputs):
     """
-    The outputs of the magres file format.
+    The outputs of the principal metadata for NMR.
     """
 
     magnetic_shieldings = SubSection(
