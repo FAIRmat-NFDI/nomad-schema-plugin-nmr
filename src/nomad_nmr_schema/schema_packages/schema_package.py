@@ -78,8 +78,8 @@ class MagneticShieldingTensor(PhysicalProperty):
         type=np.float64,
         unit='dimensionless',
         description="""
-            The isotropic part of the `MagneticShieldingTensor`. This is 1/3 of the 
-            trace of the magnetic shielding tensor (see `extract_isotropic_part()` 
+            The isotropic part of the `MagneticShieldingTensor`. This is 1/3 of the
+            trace of the magnetic shielding tensor (see `extract_isotropic_part()`
             function in `MagneticShieldingTensor`).
 
             See, e.g, https://pubs.acs.org/doi/10.1021/cr300108a.
@@ -149,7 +149,7 @@ class ElectricFieldGradient(PhysicalProperty):
     type = Quantity(
         type=MEnum('total', 'local', 'non_local'),
         description="""
-        Type of contribution to the electric field gradient (EFG). The total EFG can be 
+        Type of contribution to the electric field gradient (EFG). The total EFG can be
         decomposed on the `local` and `non_local` contributions.
         """,
     )
@@ -158,7 +158,7 @@ class ElectricFieldGradient(PhysicalProperty):
         type=np.float64,
         unit='volt / meter ** 2',
         description="""
-        Value of the electric field gradient (EFG) 
+        Value of the electric field gradient (EFG)
         for each `contribution` per unit area.
         """,
     )
@@ -166,12 +166,12 @@ class ElectricFieldGradient(PhysicalProperty):
     quadrupolar_coupling_constant = Quantity(
         type=np.float64,
         description="""
-        Quadrupolar coupling constant for each atom in the unit cell. 
+        Quadrupolar coupling constant for each atom in the unit cell.
         It is computed from the eigenvalues of the EFG tensor as:
 
             quadrupolar_coupling_constant = efg_zz * e * Z / h
 
-        where efg_zz is the largest eigenvalue of the EFG tensor, 
+        where efg_zz is the largest eigenvalue of the EFG tensor,
         Z is the atomic number.
         """,
     )
@@ -264,7 +264,7 @@ class SpinSpinCoupling(PhysicalProperty):
             'spin_dipolar',
         ),
         description="""
-        Type of contribution to the indirect spin-spin coupling. The total indirect 
+        Type of contribution to the indirect spin-spin coupling. The total indirect
         spin-spin coupling is composed of:
 
             `total` = `direct_dipolar` + J_coupling
@@ -292,13 +292,13 @@ class SpinSpinCoupling(PhysicalProperty):
         unit='kelvin**2 / joule',
         shape=[3, 3],  # dynamical shape only works for `PhysicalProperty.value`
         description="""
-        Reduced value of the indirect spin-spin couplings for each contribution. 
+        Reduced value of the indirect spin-spin couplings for each contribution.
         It relates with the normal value as:
 
-            reduced_value = value / (gyromagnetic_ratio_i * 
-                                     gyromagnetic_ratio_j * 
-                                     2 * 
-                                     np.pi * 
+            reduced_value = value / (gyromagnetic_ratio_i *
+                                     gyromagnetic_ratio_j *
+                                     2 *
+                                     np.pi *
                                      hbar)
 
         where i, j runs for each atom in the unit cell.
@@ -308,7 +308,7 @@ class SpinSpinCoupling(PhysicalProperty):
     entity_ref_1 = Quantity(
         type=Entity,
         description="""
-        Reference to the first entity that the coupling refers to. In this case, this 
+        Reference to the first entity that the coupling refers to. In this case, this
         is the first `AtomsState` in the pair of atoms that the coupling refers to.
         """,
     )
@@ -316,7 +316,7 @@ class SpinSpinCoupling(PhysicalProperty):
     entity_ref_2 = Quantity(
         type=Entity,
         description="""
-        Reference to the second entity that the coupling refers to. In this case, this 
+        Reference to the second entity that the coupling refers to. In this case, this
         is the second `AtomsState` in the pair of atoms that the coupling refers to.
         """,
     )
