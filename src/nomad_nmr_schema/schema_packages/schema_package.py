@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from structlog.stdlib import BoundLogger
 
 from nomad.datamodel.metainfo.basesections import Entity
-from nomad.metainfo import MEnum, Quantity, SchemaPackage, Section, SubSection
+from nomad.metainfo import Quantity, SchemaPackage, Section, SubSection
 from nomad_simulations.schema_packages.atoms_state import AtomsState
 from nomad_simulations.schema_packages.outputs import Outputs as BaseOutputs
 from nomad_simulations.schema_packages.physical_property import PhysicalProperty
@@ -604,18 +604,18 @@ class MagneticSusceptibility(PhysicalProperty):
 
     m_def = Section(validate=False)
 
-    scale_dimension = Quantity(
-        type=MEnum("microscopic", "macroscopic"),
-        description="""
-        Identifier of the scale dimension of the magnetic susceptibility tensor.
-        """,
-    )
+    # scale_dimension = Quantity(
+    #     type=MEnum("microscopic", "macroscopic"),
+    #     description="""
+    #     Identifier of the scale dimension of the magnetic susceptibility tensor.
+    #     """,
+    # )
 
     value = Quantity(  # TODO extend this to microscopic contributions
         type=np.float64,
-        unit="dimensionless",
+        unit="10 ** -6 * cm ** 3 / mol",
         description="""
-        Value of the magnetic susceptibility tensor.
+        Value of the macroscopic magnetic susceptibility tensor.
         """,
     )
 
@@ -627,6 +627,11 @@ class MagneticSusceptibility(PhysicalProperty):
 
     def normalize(self, archive: "EntryArchive", logger: "BoundLogger") -> None:
         super().normalize(archive, logger)
+
+        # Resolve `name` to be from the `entity_ref`
+        self.name = resolve_name_from_entity_ref(
+            entities=[self.entity_ref], logger=logger
+        )
 
 
 class Outputs(BaseOutputs):
