@@ -449,8 +449,149 @@ class IndirectSpinSpinCoupling(PhysicalProperty):
             entities=[self.entity_ref_1, self.entity_ref_2], logger=logger
         )
 
-        # TODO add normalization to extract `value` from `reduced_value`
-        # TODO add normalization to extract `reduced_value` from `value`
+        # TODO add normalization to extract `jcoupling_value` from `value`
+
+
+class IndirectSpinSpinCouplingFermiContact(PhysicalProperty):
+    """
+    Represents the Fermi contact contribution to the indirect spin-spin coupling.
+    This contribution is identified by the 'isc_fc' tag in the magres data block
+    of a .magres file.
+
+    This property will appear as a list under `Outputs` where each element corresponds
+    to an atom-atom coupling term. The specific pair of atoms is known by referencing
+    the specific `AtomsState` under `ModelSystem.cell.atoms_state` using `entity_ref_1`
+    and `entity_ref_2`.
+    """
+
+    value = Quantity(
+        type=np.float64,
+        shape=[3, 3],
+        unit="tesla ** 2 / joule",
+        description="""
+        Value of the Fermi contact contribution to the indirect spin-spin coupling tensor.
+        """,
+    )
+
+    def __init__(
+        self, m_def: "Section" = None, m_context: "Context" = None, **kwargs
+    ) -> None:
+        super().__init__(m_def, m_context, **kwargs)
+        self.rank = [3, 3]  # ! move this to definitions
+        self.name = self.m_def.name
+
+    def normalize(self, archive: "EntryArchive", logger: "BoundLogger") -> None:
+        super().normalize(archive, logger)
+
+        # Resolve `name` to be from the `entity_ref`
+        self.name = resolve_name_from_entity_ref(
+            entities=[self.entity_ref_1, self.entity_ref_2], logger=logger
+        )
+
+
+class IndirectSpinSpinCouplingOrbitalDiamagnetic(PhysicalProperty):
+    """
+    Represents the orbital diamagnetic contribution to the indirect spin-spin coupling.
+    This contribution is identified by the 'isc_orbital_d' tag in the magres data block
+    of a .magres file.
+
+    This property will appear as a list under `Outputs` where each element corresponds
+    to an atom-atom coupling term. The specific pair of atoms is known by referencing
+    the specific `AtomsState` under `ModelSystem.cell.atoms_state` using `entity_ref_1`
+    and `entity_ref_2`.
+    """
+
+    value = Quantity(
+        type=np.float64,
+        shape=[3, 3],
+        unit="tesla ** 2 / joule",
+        description="""
+        Value of the orbital diamagnetic contribution to the indirect spin-spin coupling tensor.
+        """,
+    )
+
+    def __init__(
+        self, m_def: "Section" = None, m_context: "Context" = None, **kwargs
+    ) -> None:
+        super().__init__(m_def, m_context, **kwargs)
+        self.rank = [3, 3]  # ! move this to definitions
+        self.name = self.m_def.name
+
+    def normalize(self, archive: "EntryArchive", logger: "BoundLogger") -> None:
+        super().normalize(archive, logger)
+        self.name = resolve_name_from_entity_ref(
+            entities=[self.entity_ref_1, self.entity_ref_2], logger=logger
+        )
+
+
+class IndirectSpinSpinCouplingOrbitalParamagnetic(PhysicalProperty):
+    """
+    Represents the orbital paramagnetic contribution to the indirect spin-spin coupling.
+    This contribution is identified by the 'isc_orbital_p' tag in the magres data block
+    of a .magres file.
+
+    This property will appear as a list under `Outputs` where each element corresponds
+    to an atom-atom coupling term. The specific pair of atoms is known by referencing
+    the specific `AtomsState` under `ModelSystem.cell.atoms_state` using `entity_ref_1`
+    and `entity_ref_2`.
+    """
+
+    value = Quantity(
+        type=np.float64,
+        shape=[3, 3],
+        unit="tesla ** 2 / joule",
+        description="""
+        Value of the orbital paramagnetic contribution to the indirect spin-spin coupling tensor.
+        """,
+    )
+
+    def __init__(
+        self, m_def: "Section" = None, m_context: "Context" = None, **kwargs
+    ) -> None:
+        super().__init__(m_def, m_context, **kwargs)
+        self.rank = [3, 3]  # ! move this to definitions
+        self.name = self.m_def.name
+
+    def normalize(self, archive: "EntryArchive", logger: "BoundLogger") -> None:
+        super().normalize(archive, logger)
+        self.name = resolve_name_from_entity_ref(
+            entities=[self.entity_ref_1, self.entity_ref_2], logger=logger
+        )
+
+
+class IndirectSpinSpinCouplingSpinDipolar(PhysicalProperty):
+    """
+    Represents the spin dipolar contribution to the indirect spin-spin coupling.
+    This contribution is identified by the 'isc_spin' tag in the magres data block
+    of a .magres file.
+
+    This property will appear as a list under `Outputs` where each element corresponds
+    to an atom-atom coupling term. The specific pair of atoms is known by referencing
+    the specific `AtomsState` under `ModelSystem.cell.atoms_state` using `entity_ref_1`
+    and `entity_ref_2`.
+    """
+
+    value = Quantity(
+        type=np.float64,
+        shape=[3, 3],
+        unit="tesla ** 2 / joule",
+        description="""
+        Value of the spin dipolar contribution to the indirect spin-spin coupling tensor.
+        """,
+    )
+
+    def __init__(
+        self, m_def: "Section" = None, m_context: "Context" = None, **kwargs
+    ) -> None:
+        super().__init__(m_def, m_context, **kwargs)
+        self.rank = [3, 3]  # ! move this to definitions
+        self.name = self.m_def.name
+
+    def normalize(self, archive: "EntryArchive", logger: "BoundLogger") -> None:
+        super().normalize(archive, logger)
+        self.name = resolve_name_from_entity_ref(
+            entities=[self.entity_ref_1, self.entity_ref_2], logger=logger
+        )
 
 
 class MagneticSusceptibility(PhysicalProperty):
@@ -499,7 +640,9 @@ class Outputs(BaseOutputs):
     electric_field_gradients = SubSection(
         sub_section=ElectricFieldGradient.m_def, repeats=True
     )
-    spin_spin_couplings = SubSection(sub_section=SpinSpinCoupling.m_def, repeats=True)
+    spin_spin_couplings = SubSection(
+        sub_section=IndirectSpinSpinCoupling.m_def, repeats=True
+    )
     magnetic_susceptibilities = SubSection(
         sub_section=MagneticSusceptibility.m_def, repeats=True
     )
