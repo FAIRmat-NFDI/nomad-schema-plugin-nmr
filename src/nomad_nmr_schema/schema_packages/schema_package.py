@@ -171,12 +171,13 @@ class ElectricFieldGradient(PhysicalProperty):
         type=np.float64,
         description="""
         Quadrupolar coupling constant for each atom in the unit cell.
-        It is computed from the eigenvalues of the EFG tensor as:
+        Once the eigenvalues of the EFG tensors are computed, it is computed as:
 
-            quadrupolar_coupling_constant = efg_zz * e * Z / h
+            quadrupolar_coupling_constant = efg_zz * e * Q / h
 
         where efg_zz is the largest eigenvalue of the EFG tensor,
-        Z is the atomic number.
+        Q is the nuclear quadrupole moment, e is the elementary charge, and
+        h is the Planck's constant.
         """,
     )
 
