@@ -598,6 +598,8 @@ class MagneticSusceptibility(PhysicalProperty):
     """
     Section containing the information of magnetic susceptibility tensor. Degree of
     magnetization of a material in the presence of a magnetic field.
+
+    This tensor is identified by the 'sus' tag in the magres data block of a .magres file.
     """
 
     # TODO currently only the macroscopic quantity is being supported
