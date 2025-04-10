@@ -301,20 +301,20 @@ class ElectricFieldGradientNonlocal(PhysicalProperty):
 #     """
 #     Represents the electric field gradients (EFG) data.
 
-    This class contains the total, local, and non-local components
-    of the electric field gradients.
-    Each component is represented as a subsection of the ElectricFieldGradient class
-    and can have multiple entries.
+#     This class contains the total, local, and non-local components
+#     of the electric field gradients.
+#     Each component is represented as a subsection of the ElectricFieldGradient class
+#     and can have multiple entries.
 
-    Attributes:
-        efg_total (SubSection): A list of total electric field gradient entries.
-        efg_local (SubSection): A list of local electric field gradient entries.
-        efg_nonlocal (SubSection): A list of non-local electric field gradient entries.
-    """
+#     Attributes:
+#         efg_total (SubSection): A list of total electric field gradient entries.
+#         efg_local (SubSection): A list of local electric field gradient entries.
+#         efg_nonlocal (SubSection): A list of non-local electric field gradient entries.
+#     """
 
-    efg_total = SubSection(sub_section=ElectricFieldGradient.m_def, repeats=True)
-    efg_local = SubSection(sub_section=ElectricFieldGradient.m_def, repeats=True)
-    efg_nonlocal = SubSection(sub_section=ElectricFieldGradient.m_def, repeats=True)
+#     efg_total = SubSection(sub_section=ElectricFieldGradient.m_def, repeats=True)
+#     efg_local = SubSection(sub_section=ElectricFieldGradient.m_def, repeats=True)
+#     efg_nonlocal = SubSection(sub_section=ElectricFieldGradient.m_def, repeats=True)
 
 
 class SpinSpinCoupling(PhysicalProperty):
