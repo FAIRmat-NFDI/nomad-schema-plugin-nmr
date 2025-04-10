@@ -602,18 +602,9 @@ class MagneticSusceptibility(PhysicalProperty):
     This tensor is identified by the 'sus' tag in the magres data block of a .magres file.
     """
 
-    # TODO currently only the macroscopic quantity is being supported
-
     m_def = Section(validate=False)
 
-    # scale_dimension = Quantity(
-    #     type=MEnum("microscopic", "macroscopic"),
-    #     description="""
-    #     Identifier of the scale dimension of the magnetic susceptibility tensor.
-    #     """,
-    # )
-
-    value = Quantity(  # TODO extend this to microscopic contributions
+    value = Quantity(
         type=np.float64,
         unit="10 ** -6 * cm ** 3 / mol",
         description="""
