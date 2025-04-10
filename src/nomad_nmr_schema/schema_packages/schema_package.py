@@ -51,7 +51,7 @@ def resolve_name_from_entity_ref(entities: list[Entity], logger: "BoundLogger") 
     return name
 
 
-class MagneticShieldingTensor(PhysicalProperty):
+class MagneticShielding(PhysicalProperty):
     """
     Nuclear response of a material to shield the effects of an applied external field.
     This is a tensor 3x3 related with the induced magnetic field as:
@@ -634,9 +634,7 @@ class Outputs(BaseOutputs):
     The outputs of the principal metadata for NMR.
     """
 
-    magnetic_shieldings = SubSection(
-        sub_section=MagneticShieldingTensor.m_def, repeats=True
-    )
+    magnetic_shieldings = SubSection(sub_section=MagneticShielding.m_def, repeats=True)
     electric_field_gradients = SubSection(
         sub_section=ElectricFieldGradient.m_def, repeats=True
     )
