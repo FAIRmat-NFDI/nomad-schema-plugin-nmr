@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from structlog.stdlib import BoundLogger
 
 from nomad.datamodel.metainfo.basesections import Entity
-from nomad.metainfo import Quantity, SchemaPackage, Section, SubSection
+from nomad.metainfo import MEnum, Quantity, SchemaPackage, Section, SubSection
 from nomad_simulations.schema_packages.atoms_state import AtomsState
 from nomad_simulations.schema_packages.outputs import Outputs as BaseOutputs
 from nomad_simulations.schema_packages.physical_property import PhysicalProperty
@@ -603,6 +603,13 @@ class MagneticSusceptibility(PhysicalProperty):
     """
 
     m_def = Section(validate=False)
+
+    approximation_type = Quantity(
+        type=MEnum("pGv-approximation", "vGv-approximation"),
+        description="""
+        Some DFT codes might split the magnetic susceptibility into that obtained by the pGv-approximation and obtained by the vGv-approximation.
+        """,
+    )
 
     value = Quantity(
         type=np.float64,
