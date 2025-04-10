@@ -645,8 +645,26 @@ class Outputs(BaseOutputs):
     electric_field_gradients = SubSection(
         sub_section=ElectricFieldGradient.m_def, repeats=True
     )
-    spin_spin_couplings = SubSection(
+    electric_field_gradients_local = SubSection(
+        sub_section=ElectricFieldGradientLocal.m_def, repeats=True
+    )
+    electric_field_gradients_nonlocal = SubSection(
+        sub_section=ElectricFieldGradientNonlocal.m_def, repeats=True
+    )
+    indirect_spin_spin_couplings = SubSection(
         sub_section=IndirectSpinSpinCoupling.m_def, repeats=True
+    )
+    indirect_spin_spin_couplings_fermi_contact = SubSection(
+        sub_section=IndirectSpinSpinCouplingFermiContact.m_def, repeats=True
+    )
+    indirect_spin_spin_couplings_orbital_p = SubSection(
+        sub_section=IndirectSpinSpinCouplingOrbitalParamagnetic.m_def, repeats=True
+    )
+    indirect_spin_spin_couplings_orbital_d = SubSection(
+        sub_section=IndirectSpinSpinCouplingOrbitalDiamagnetic.m_def, repeats=True
+    )
+    indirect_spin_spin_couplings_spin_dipolar = SubSection(
+        sub_section=IndirectSpinSpinCouplingSpinDipolar.m_def, repeats=True
     )
     magnetic_susceptibilities = SubSection(
         sub_section=MagneticSusceptibility.m_def, repeats=True
