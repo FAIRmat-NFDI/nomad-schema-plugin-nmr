@@ -140,25 +140,29 @@ class ElectricFieldGradient(PhysicalProperty):
 
     See, e.g, https://pubs.acs.org/doi/10.1021/cr300108a.
 
-    This property will appear as a list under `Outputs` where each of the elements
-    correspond to an atom in the unit cell.
+    This class by default refers to the 'total' contribution to the EFG. This property
+    will appear as a list under `Outputs` where each of the elements correspond to an atom
+    in the unit cell.
     The specific atom is known by defining the reference to the specific `AtomsState`
     under `ModelSystem.cell.atoms_state` using `entity_ref`.
     """
 
-    type = Quantity(
-        type=MEnum('total', 'local', 'non_local'),
-        description="""
-        Type of contribution to the electric field gradient (EFG). The total EFG can be
-        decomposed on the `local` and `non_local` contributions.
-        """,
-    )
+    # The below code is commented out because we want to capture the local and non-local
+    # contributions to the EFG in their own classes.
+    # type = Quantity(
+    #     type=MEnum("total", "local", "non_local"),
+    #     description="""
+    #     Type of contribution to the electric field gradient (EFG). The total EFG can be
+    #     decomposed on the `local` and `non_local` contributions.
+    #     """,
+    # )
 
     value = Quantity(
         type=np.float64,
-        unit='volt / meter ** 2',
+        shape=[3, 3],
+        unit="volt / meter ** 2",
         description="""
-        Value of the electric field gradient (EFG)
+        Value of the total electric field gradient (EFG)
         for each `contribution` per unit area.
         """,
     )
