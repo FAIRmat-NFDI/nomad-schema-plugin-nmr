@@ -162,8 +162,7 @@ class ElectricFieldGradient(PhysicalProperty):
         shape=[3, 3],
         unit="volt / meter ** 2",
         description="""
-        Value of the total electric field gradient (EFG)
-        for each `contribution` per unit area.
+        The electric field gradient (EFG) tensor.
         """,
     )
 
