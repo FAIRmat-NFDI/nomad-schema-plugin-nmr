@@ -621,11 +621,6 @@ class MagneticSusceptibility(PhysicalProperty):
     def normalize(self, archive: "EntryArchive", logger: "BoundLogger") -> None:
         super().normalize(archive, logger)
 
-        # Resolve `name` to be from the `entity_ref`
-        self.name = resolve_name_from_entity_ref(
-            entities=[self.entity_ref], logger=logger
-        )
-
 
 class Outputs(BaseOutputs):
     """
