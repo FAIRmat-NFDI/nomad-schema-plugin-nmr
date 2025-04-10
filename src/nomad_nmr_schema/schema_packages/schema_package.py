@@ -316,74 +316,103 @@ class ElectricFieldGradientNonlocal(PhysicalProperty):
 #     efg_nonlocal = SubSection(sub_section=ElectricFieldGradient.m_def, repeats=True)
 
 
-class SpinSpinCoupling(PhysicalProperty):
+class IndirectSpinSpinCoupling(PhysicalProperty):
     """
     Indirect exchanges or interactions between 2 nuclear spins that arises from
-    hyperfine interactions between the nuclei and local electrons.
+    hyperfine interactions between the nuclei and local electrons. This parameter is
+        identified by the 'isc' tag in the magres data block of a .magres file.
+
+    The total indirect coupling can be decomposed into the following contributions, which
+    can each be output by some DFT codes:
+        - Fermi contact (tag 'isc_fc' in the magres data block)
+        - Orbital paramagnetic (tag 'isc_orbital_p' in the magres data block)
+        - Orbital diamagnetic (tag 'isc_orbital_d' in the magres data block)
+        - Spin dipolar (tag 'isc_spin' in the magres data block)
+    These contributions will be captured in their own classes.
 
     This property will appear as a list under `Outputs` where each of the elements
     correspond to an atom-atom coupling term. The specific pair of atoms defined for
     the coupling is known by referencing the specific `AtomsState`
     under `ModelSystem.cell.atoms_state` using `entity_ref_1` and `entity_ref_2`.
-
-    Synonyms:
-        - IndirectSpinSpinCoupling
     """
 
-    # TODO extend this to other spin-spin coupling types besides
-    # indirect (which is useful in NMR)
+    # TODO dipolar (or direct) coupling needs to be included at a higher level,
+    # potentially calculated by Soprano python library to compute the overall spin-spin
+    # coupling.
 
     # we hide `entity_ref` from `PhysicalProperty` to avoid confusion
     m_def = Section(a_eln={"hide": ["entity_ref"]})
 
-    type = Quantity(
-        type=MEnum(
-            "total",
-            "direct_dipolar",
-            "fermi_contact",
-            "orbital_diamagnetic",
-            "orbital_paramagnetic",
-            "spin_dipolar",
-        ),
-        description="""
-        Type of contribution to the indirect spin-spin coupling. The total indirect
-        spin-spin coupling is composed of:
+    # The below code is commented out because we want to capture the decomposed
+    # contributions to the indirect spin-spin coupling in their own classes.
+    # type = Quantity(
+    #     type=MEnum(
+    #         "total",
+    #         "direct_dipolar",
+    #         "fermi_contact",
+    #         "orbital_diamagnetic",
+    #         "orbital_paramagnetic",
+    #         "spin_dipolar",
+    #     ),
+    #     description="""
+    #     Type of contribution to the indirect spin-spin coupling. The total indirect
+    #     spin-spin coupling is composed of:
 
-            `total` = `direct_dipolar` + J_coupling
+    #         `total` = `direct_dipolar` + J_coupling
 
-        Where the J_coupling is:
-            J_coupling = `fermi_contact`
-                        + `spin_dipolar`
-                        + `orbital_diamagnetic`
-                        + `orbital_paramagnetic`
+    #     Where the J_coupling is:
+    #         J_coupling = `fermi_contact`
+    #                     + `spin_dipolar`
+    #                     + `orbital_diamagnetic`
+    #                     + `orbital_paramagnetic`
 
-        See https://pubs.acs.org/doi/full/10.1021/cr300108a.
-        """,
-    )
+    #     See https://pubs.acs.org/doi/full/10.1021/cr300108a.
+    #     """,
+    # )
 
     value = Quantity(
         type=np.float64,
-        unit="joule",
+        shape=[3, 3],
+        unit="tesla ** 2 / joule",
         description="""
-        Value of the indirect spin-spin couplings for each contribution.
+        The total indirect spin-spin coupling tensor output from DFT codes is called the
+        reduced spin coupling tensor K_ij, where i and j are nuclei between which the
+        coupling is computed. The K_ij tensor is obtained from the magnetic field induced
+        at nucleus i due to the perturbative effect of the magnetic moment of nucleus
+        j as:
+
+            K_ij = B_induced_i / magnetic_moment_j
+
+        where B_induced_i is the induced magnetic field at nucleus i.
+
+        Where the indirect spin-spin coupling is:
+            indirect_spin_spin_coupling = `fermi_contact`
+                                         + `spin_dipolar`
+                                         + `orbital_diamagnetic`
+                                         + `orbital_paramagnetic`
+
+        See, https://pubs.acs.org/doi/full/10.1021/cr300108a.
         """,
     )
 
-    reduced_value = Quantity(
+    jcoupling_value = Quantity(
         type=np.float64,
-        unit="kelvin**2 / joule",
+        unit="hertz",
         shape=[3, 3],  # dynamical shape only works for `PhysicalProperty.value`
         description="""
-        Reduced value of the indirect spin-spin couplings for each contribution.
+        The J-coupling tensor J_ij is obtained from the indirect spin-spin coupling using:
         It relates with the normal value as:
 
-            reduced_value = value / (gyromagnetic_ratio_i *
-                                     gyromagnetic_ratio_j *
-                                     2 *
-                                     np.pi *
-                                     hbar)
+            jcoupling_value = (value *
+                                gyromagnetic_ratio_i *
+                                gyromagnetic_ratio_j *
+                                2 *
+                                np.pi *
+                                hbar)
 
         where i, j runs for each atom in the unit cell.
+
+        See, e.g, https://pubs.acs.org/doi/10.1021/cr300108a.
         """,
     )
 
@@ -409,7 +438,7 @@ class SpinSpinCoupling(PhysicalProperty):
         super().__init__(m_def, m_context, **kwargs)
         self.rank = [3, 3]  # ! move this to definitions
 
-    def resolve_reduced_value(self, logger: "BoundLogger") -> None:
+    def resolve_jcoupling_value(self, logger: "BoundLogger") -> None:
         pass
 
     def normalize(self, archive: "EntryArchive", logger: "BoundLogger") -> None:
