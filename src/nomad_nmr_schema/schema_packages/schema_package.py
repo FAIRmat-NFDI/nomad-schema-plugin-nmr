@@ -141,8 +141,8 @@ class ElectricFieldGradient(PhysicalProperty):
     See, e.g, https://pubs.acs.org/doi/10.1021/cr300108a.
 
     This class by default refers to the 'total' contribution to the EFG. This property
-    will appear as a list under `Outputs` where each of the elements correspond to an atom
-    in the unit cell.
+    will appear as a list under `Outputs` where each of the elements correspond to an
+    atom in the unit cell.
     The specific atom is known by defining the reference to the specific `AtomsState`
     under `ModelSystem.cell.atoms_state` using `entity_ref`.
     """
@@ -152,8 +152,8 @@ class ElectricFieldGradient(PhysicalProperty):
     # type = Quantity(
     #     type=MEnum("total", "local", "non_local"),
     #     description="""
-    #     Type of contribution to the electric field gradient (EFG). The total EFG can be
-    #     decomposed on the `local` and `non_local` contributions.
+    #     Type of contribution to the electric field gradient (EFG). The total EFG can
+    #     be decomposed on the `local` and `non_local` contributions.
     #     """,
     # )
 
@@ -221,12 +221,14 @@ class ElectricFieldGradient(PhysicalProperty):
 class ElectricFieldGradientLocal(PhysicalProperty):
     """
     Represents the local contribution to the electric field gradient (EFG) at the
-    nucleus position. Some DFT codes may provide the EFG decomposed into theory-dependent
-    contributions. The local contribution is one of these decomposed contributions,
-    identified by a 'efg_local' tag in the magres data block of a .magres file.
+    nucleus position. Some DFT codes may provide the EFG decomposed into
+    theory-dependent contributions. The local contribution is one of these decomposed
+    contributions, identified by a 'efg_local' tag in the magres data block of a
+    .magres file.
 
     This property is relevant for Nuclear Magnetic Resonance (NMR) and will appear
-    as a list under `Outputs` where each element corresponds to an atom in the unit cell.
+    as a list under `Outputs` where each element corresponds to an atom in the unit
+    cell.
 
     The specific atom is known by defining the reference to the specific `AtomsState`
     under `ModelSystem.cell.atoms_state` using `entity_ref`.
@@ -260,12 +262,14 @@ class ElectricFieldGradientLocal(PhysicalProperty):
 class ElectricFieldGradientNonlocal(PhysicalProperty):
     """
     Represents the non-local contribution to the electric field gradient (EFG) at the
-    nucleus position. Some DFT codes may provide the EFG decomposed into theory-dependent
-    contributions. The non-local contribution is one of these decomposed contributions,
-    identified by a 'efg_nonlocal' tag in the magres data block of a .magres file.
+    nucleus position. Some DFT codes may provide the EFG decomposed into
+    theory-dependent contributions. The non-local contribution is one of these
+    decomposed contributions, identified by a 'efg_nonlocal' tag in the magres data
+    block of a .magres file.
 
     This property is relevant for Nuclear Magnetic Resonance (NMR) and will appear
-    as a list under `Outputs` where each element corresponds to an atom in the unit cell.
+    as a list under `Outputs` where each element corresponds to an atom in the unit
+    cell.
 
     The specific atom is known by defining the reference to the specific `AtomsState`
     under `ModelSystem.cell.atoms_state` using `entity_ref`.
@@ -308,7 +312,8 @@ class ElectricFieldGradientNonlocal(PhysicalProperty):
 #     Attributes:
 #         efg_total (SubSection): A list of total electric field gradient entries.
 #         efg_local (SubSection): A list of local electric field gradient entries.
-#         efg_nonlocal (SubSection): A list of non-local electric field gradient entries.
+#         efg_nonlocal (SubSection): A list of non-local electric field gradient
+#         entries.
 #     """
 
 #     efg_total = SubSection(sub_section=ElectricFieldGradient.m_def, repeats=True)
@@ -322,8 +327,8 @@ class IndirectSpinSpinCoupling(PhysicalProperty):
     hyperfine interactions between the nuclei and local electrons. This parameter is
         identified by the 'isc' tag in the magres data block of a .magres file.
 
-    The total indirect coupling can be decomposed into the following contributions, which
-    can each be output by some DFT codes:
+    The total indirect coupling can be decomposed into the following contributions,
+    which can each be output by some DFT codes:
         - Fermi contact (tag 'isc_fc' in the magres data block)
         - Orbital paramagnetic (tag 'isc_orbital_p' in the magres data block)
         - Orbital diamagnetic (tag 'isc_orbital_d' in the magres data block)
@@ -377,9 +382,9 @@ class IndirectSpinSpinCoupling(PhysicalProperty):
         description="""
         The total indirect spin-spin coupling tensor output from DFT codes is called the
         reduced spin coupling tensor K_ij, where i and j are nuclei between which the
-        coupling is computed. The K_ij tensor is obtained from the magnetic field induced
-        at nucleus i due to the perturbative effect of the magnetic moment of nucleus
-        j as:
+        coupling is computed. The K_ij tensor is obtained from the magnetic field
+        induced at nucleus i due to the perturbative effect of the magnetic moment of
+        nucleus j as:
 
             K_ij = B_induced_i / magnetic_moment_j
 
@@ -400,8 +405,8 @@ class IndirectSpinSpinCoupling(PhysicalProperty):
         unit="hertz",
         shape=[3, 3],  # dynamical shape only works for `PhysicalProperty.value`
         description="""
-        The J-coupling tensor J_ij is obtained from the indirect spin-spin coupling using:
-        It relates with the normal value as:
+        The J-coupling tensor J_ij is obtained from the indirect spin-spin coupling
+        using:
 
             jcoupling_value = (value *
                                 gyromagnetic_ratio_i *
@@ -469,7 +474,8 @@ class IndirectSpinSpinCouplingFermiContact(PhysicalProperty):
         shape=[3, 3],
         unit="tesla ** 2 / joule",
         description="""
-        Value of the Fermi contact contribution to the indirect spin-spin coupling tensor.
+        Value of the Fermi contact contribution to the indirect spin-spin coupling
+        tensor.
         """,
     )
 
@@ -506,7 +512,8 @@ class IndirectSpinSpinCouplingOrbitalDiamagnetic(PhysicalProperty):
         shape=[3, 3],
         unit="tesla ** 2 / joule",
         description="""
-        Value of the orbital diamagnetic contribution to the indirect spin-spin coupling tensor.
+        Value of the orbital diamagnetic contribution to the indirect spin-spin coupling
+        tensor.
         """,
     )
 
@@ -541,7 +548,8 @@ class IndirectSpinSpinCouplingOrbitalParamagnetic(PhysicalProperty):
         shape=[3, 3],
         unit="tesla ** 2 / joule",
         description="""
-        Value of the orbital paramagnetic contribution to the indirect spin-spin coupling tensor.
+        Value of the orbital paramagnetic contribution to the indirect spin-spin
+        coupling tensor.
         """,
     )
 
@@ -576,7 +584,8 @@ class IndirectSpinSpinCouplingSpinDipolar(PhysicalProperty):
         shape=[3, 3],
         unit="tesla ** 2 / joule",
         description="""
-        Value of the spin dipolar contribution to the indirect spin-spin coupling tensor.
+        Value of the spin dipolar contribution to the indirect spin-spin coupling
+        tensor.
         """,
     )
 
@@ -601,7 +610,8 @@ class MagneticSusceptibility(PhysicalProperty):
 
     See, e.g, https://doi.org/10.1039/9781837673179-00061.
 
-    This tensor is identified by the 'sus' tag in the magres data block of a .magres file.
+    This tensor is identified by the 'sus' tag in the magres data block of a .magres
+    file.
     """
 
     m_def = Section(validate=False)
