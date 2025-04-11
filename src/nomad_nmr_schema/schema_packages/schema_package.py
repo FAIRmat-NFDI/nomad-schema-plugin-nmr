@@ -16,7 +16,7 @@ from nomad_simulations.schema_packages.physical_property import PhysicalProperty
 m_package = SchemaPackage()
 
 
-def resolve_name_from_entity_ref(entities: list[Entity], logger: "BoundLogger") -> str:
+def resolve_name_from_entity_ref(entities: list[Entity], logger: 'BoundLogger') -> str:
     """
     Resolves the `name` of the atom-resolved `PhysicalProperty` from the `entity_ref`
     by assigning a label corresponding to the `AtomsState.chemical_symbol` and a number
@@ -29,25 +29,25 @@ def resolve_name_from_entity_ref(entities: list[Entity], logger: "BoundLogger") 
     Returns:
         (str): The resolved name of the atom-resolved `PhysicalProperty`.
     """
-    name = ""
+    name = ''
     for entity in entities:
         atoms_state = entity
         # Check if `entity_ref` exists and it is an AtomsState
         if not atoms_state or not isinstance(atoms_state, AtomsState):
             logger.error(
-                "Could not find `entity_ref` referencing an `AtomsState` section."
+                'Could not find `entity_ref` referencing an `AtomsState` section.'
             )
-            return ""
+            return ''
         # Check if the parent of `entity_ref` exists
         cell = atoms_state.m_parent
         if not cell:
             logger.warning(
-                "The parent of the `AtomsState` in `entity_ref` does not exist."
+                'The parent of the `AtomsState` in `entity_ref` does not exist.'
             )
-            return ""
+            return ''
 
-        index = ""  # ! implement here if needed
-        name += f"{atoms_state.chemical_symbol}{index}"
+        index = ''  # ! implement here if needed
+        name += f'{atoms_state.chemical_symbol}{index}'
     return name
 
 
@@ -69,14 +69,14 @@ class MagneticShielding(PhysicalProperty):
     value = Quantity(
         type=np.float64,
         shape=[3, 3],
-        unit="dimensionless",
+        unit='dimensionless',
         description="""
         Value of the magnetic shielding tensor per atom.
         """,
     )
     value_isotropic = Quantity(
         type=np.float64,
-        unit="dimensionless",
+        unit='dimensionless',
         description="""
             The isotropic part of the `MagneticShieldingTensor`. This is 1/3 of the
             trace of the magnetic shielding tensor (see `extract_isotropic_part()`
@@ -87,14 +87,14 @@ class MagneticShielding(PhysicalProperty):
     )
 
     def __init__(
-        self, m_def: "Section" = None, m_context: "Context" = None, **kwargs
+        self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
     ) -> None:
         super().__init__(m_def, m_context, **kwargs)
         # ! this info is in the shape attribute of the Quantity
         self.rank = [3, 3]
         self.name = self.m_def.name
 
-    def extract_isotropic_part(self, logger: "BoundLogger") -> float | None:
+    def extract_isotropic_part(self, logger: 'BoundLogger') -> float | None:
         """
         Extract the isotropic part of the magnetic shielding tensor. This is 1/3 of the
         trace of the magnetic shielding tensor `value`.
@@ -109,11 +109,11 @@ class MagneticShielding(PhysicalProperty):
             # Calculate the isotropic value
             isotropic = np.trace(np.array(self.value)) / 3.0
         except Exception:
-            logger.warning("Could not extract the trace of the `value` tensor.")
+            logger.warning('Could not extract the trace of the `value` tensor.')
             return None
         return isotropic
 
-    def normalize(self, archive: "EntryArchive", logger: "BoundLogger") -> None:
+    def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
         super().normalize(archive, logger)
 
         # Resolve `name` to be from the `entity_ref`
@@ -124,10 +124,10 @@ class MagneticShielding(PhysicalProperty):
         # isotropic value extraction
         isotropic = self.extract_isotropic_part(logger)
         if isotropic is not None:
-            logger.info(f"Appending isotropic value for {self.name}")
+            logger.info(f'Appending isotropic value for {self.name}')
             self.value_isotropic = isotropic
         else:
-            logger.warning(f"Isotropic value extraction failed for {self.name}")
+            logger.warning(f'Isotropic value extraction failed for {self.name}')
 
 
 class ElectricFieldGradient(PhysicalProperty):
@@ -160,7 +160,7 @@ class ElectricFieldGradient(PhysicalProperty):
     value = Quantity(
         type=np.float64,
         shape=[3, 3],
-        unit="volt / meter ** 2",
+        unit='volt / meter ** 2',
         description="""
         The electric field gradient (EFG) tensor.
         """,
@@ -194,19 +194,19 @@ class ElectricFieldGradient(PhysicalProperty):
     )
 
     def __init__(
-        self, m_def: "Section" = None, m_context: "Context" = None, **kwargs
+        self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
     ) -> None:
         super().__init__(m_def, m_context, **kwargs)
         self.rank = [3, 3]  # ! move this to definitions  !!! TODO
         self.name = self.m_def.name
 
-    def resolve_quadrupolar_coupling_constant(self, logger: "BoundLogger") -> None:
+    def resolve_quadrupolar_coupling_constant(self, logger: 'BoundLogger') -> None:
         pass
 
-    def resolve_asymmetry_parameter(self, logger: "BoundLogger") -> None:
+    def resolve_asymmetry_parameter(self, logger: 'BoundLogger') -> None:
         pass
 
-    def normalize(self, archive: "EntryArchive", logger: "BoundLogger") -> None:
+    def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
         super().normalize(archive, logger)
 
         # Resolve `name` to be from the `entity_ref`
@@ -237,20 +237,20 @@ class ElectricFieldGradientLocal(PhysicalProperty):
     value = Quantity(
         type=np.float64,
         shape=[3, 3],
-        unit="volt / meter ** 2",
+        unit='volt / meter ** 2',
         description="""
         Value of the local electric field gradient (EFG) tensor for each atom.
         """,
     )
 
     def __init__(
-        self, m_def: "Section" = None, m_context: "Context" = None, **kwargs
+        self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
     ) -> None:
         super().__init__(m_def, m_context, **kwargs)
         self.rank = [3, 3]  # ! move this to definitions  !!! TODO
         self.name = self.m_def.name
 
-    def normalize(self, archive: "EntryArchive", logger: "BoundLogger") -> None:
+    def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
         super().normalize(archive, logger)
 
         # Resolve `name` to be from the `entity_ref`
@@ -278,20 +278,20 @@ class ElectricFieldGradientNonlocal(PhysicalProperty):
     value = Quantity(
         type=np.float64,
         shape=[3, 3],
-        unit="volt / meter ** 2",
+        unit='volt / meter ** 2',
         description="""
         Value of the non-local electric field gradient (EFG) tensor for each atom.
         """,
     )
 
     def __init__(
-        self, m_def: "Section" = None, m_context: "Context" = None, **kwargs
+        self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
     ) -> None:
         super().__init__(m_def, m_context, **kwargs)
         self.rank = [3, 3]  # ! move this to definitions  !!! TODO
         self.name = self.m_def.name
 
-    def normalize(self, archive: "EntryArchive", logger: "BoundLogger") -> None:
+    def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
         super().normalize(archive, logger)
 
         # Resolve `name` to be from the `entity_ref`
@@ -346,7 +346,7 @@ class IndirectSpinSpinCoupling(PhysicalProperty):
     # coupling.
 
     # we hide `entity_ref` from `PhysicalProperty` to avoid confusion
-    m_def = Section(a_eln={"hide": ["entity_ref"]})
+    m_def = Section(a_eln={'hide': ['entity_ref']})
 
     # The below code is commented out because we want to capture the decomposed
     # contributions to the indirect spin-spin coupling in their own classes.
@@ -378,7 +378,7 @@ class IndirectSpinSpinCoupling(PhysicalProperty):
     value = Quantity(
         type=np.float64,
         shape=[3, 3],
-        unit="tesla ** 2 / joule",
+        unit='tesla ** 2 / joule',
         description="""
         The total indirect spin-spin coupling tensor output from DFT codes is called the
         reduced spin coupling tensor K_ij, where i and j are nuclei between which the
@@ -402,7 +402,7 @@ class IndirectSpinSpinCoupling(PhysicalProperty):
 
     jcoupling_value = Quantity(
         type=np.float64,
-        unit="hertz",
+        unit='hertz',
         shape=[3, 3],  # dynamical shape only works for `PhysicalProperty.value`
         description="""
         The J-coupling tensor J_ij is obtained from the indirect spin-spin coupling
@@ -438,15 +438,15 @@ class IndirectSpinSpinCoupling(PhysicalProperty):
     )
 
     def __init__(
-        self, m_def: "Section" = None, m_context: "Context" = None, **kwargs
+        self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
     ) -> None:
         super().__init__(m_def, m_context, **kwargs)
         self.rank = [3, 3]  # ! move this to definitions
 
-    def resolve_jcoupling_value(self, logger: "BoundLogger") -> None:
+    def resolve_jcoupling_value(self, logger: 'BoundLogger') -> None:
         pass
 
-    def normalize(self, archive: "EntryArchive", logger: "BoundLogger") -> None:
+    def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
         super().normalize(archive, logger)
 
         # Resolve `name` to be from the `entity_ref`
@@ -472,7 +472,7 @@ class IndirectSpinSpinCouplingFermiContact(PhysicalProperty):
     value = Quantity(
         type=np.float64,
         shape=[3, 3],
-        unit="tesla ** 2 / joule",
+        unit='tesla ** 2 / joule',
         description="""
         Value of the Fermi contact contribution to the indirect spin-spin coupling
         tensor.
@@ -480,13 +480,13 @@ class IndirectSpinSpinCouplingFermiContact(PhysicalProperty):
     )
 
     def __init__(
-        self, m_def: "Section" = None, m_context: "Context" = None, **kwargs
+        self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
     ) -> None:
         super().__init__(m_def, m_context, **kwargs)
         self.rank = [3, 3]  # ! move this to definitions
         self.name = self.m_def.name
 
-    def normalize(self, archive: "EntryArchive", logger: "BoundLogger") -> None:
+    def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
         super().normalize(archive, logger)
 
         # Resolve `name` to be from the `entity_ref`
@@ -510,7 +510,7 @@ class IndirectSpinSpinCouplingOrbitalDiamagnetic(PhysicalProperty):
     value = Quantity(
         type=np.float64,
         shape=[3, 3],
-        unit="tesla ** 2 / joule",
+        unit='tesla ** 2 / joule',
         description="""
         Value of the orbital diamagnetic contribution to the indirect spin-spin coupling
         tensor.
@@ -518,13 +518,13 @@ class IndirectSpinSpinCouplingOrbitalDiamagnetic(PhysicalProperty):
     )
 
     def __init__(
-        self, m_def: "Section" = None, m_context: "Context" = None, **kwargs
+        self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
     ) -> None:
         super().__init__(m_def, m_context, **kwargs)
         self.rank = [3, 3]  # ! move this to definitions
         self.name = self.m_def.name
 
-    def normalize(self, archive: "EntryArchive", logger: "BoundLogger") -> None:
+    def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
         super().normalize(archive, logger)
         self.name = resolve_name_from_entity_ref(
             entities=[self.entity_ref_1, self.entity_ref_2], logger=logger
@@ -546,7 +546,7 @@ class IndirectSpinSpinCouplingOrbitalParamagnetic(PhysicalProperty):
     value = Quantity(
         type=np.float64,
         shape=[3, 3],
-        unit="tesla ** 2 / joule",
+        unit='tesla ** 2 / joule',
         description="""
         Value of the orbital paramagnetic contribution to the indirect spin-spin
         coupling tensor.
@@ -554,13 +554,13 @@ class IndirectSpinSpinCouplingOrbitalParamagnetic(PhysicalProperty):
     )
 
     def __init__(
-        self, m_def: "Section" = None, m_context: "Context" = None, **kwargs
+        self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
     ) -> None:
         super().__init__(m_def, m_context, **kwargs)
         self.rank = [3, 3]  # ! move this to definitions
         self.name = self.m_def.name
 
-    def normalize(self, archive: "EntryArchive", logger: "BoundLogger") -> None:
+    def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
         super().normalize(archive, logger)
         self.name = resolve_name_from_entity_ref(
             entities=[self.entity_ref_1, self.entity_ref_2], logger=logger
@@ -582,7 +582,7 @@ class IndirectSpinSpinCouplingSpinDipolar(PhysicalProperty):
     value = Quantity(
         type=np.float64,
         shape=[3, 3],
-        unit="tesla ** 2 / joule",
+        unit='tesla ** 2 / joule',
         description="""
         Value of the spin dipolar contribution to the indirect spin-spin coupling
         tensor.
@@ -590,13 +590,13 @@ class IndirectSpinSpinCouplingSpinDipolar(PhysicalProperty):
     )
 
     def __init__(
-        self, m_def: "Section" = None, m_context: "Context" = None, **kwargs
+        self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
     ) -> None:
         super().__init__(m_def, m_context, **kwargs)
         self.rank = [3, 3]  # ! move this to definitions
         self.name = self.m_def.name
 
-    def normalize(self, archive: "EntryArchive", logger: "BoundLogger") -> None:
+    def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
         super().normalize(archive, logger)
         self.name = resolve_name_from_entity_ref(
             entities=[self.entity_ref_1, self.entity_ref_2], logger=logger
@@ -618,20 +618,20 @@ class MagneticSusceptibility(PhysicalProperty):
 
     value = Quantity(
         type=np.float64,
-        unit="10 ** -6 * cm ** 3 / mol",
+        unit='10 ** -6 * cm ** 3 / mol',
         description="""
         Value of the macroscopic magnetic susceptibility tensor.
         """,
     )
 
     def __init__(
-        self, m_def: "Section" = None, m_context: "Context" = None, **kwargs
+        self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
     ) -> None:
         super().__init__(m_def, m_context, **kwargs)
         self.rank = [3, 3]  # ! move this to definitions
         self.name = self.m_def.name  # Explicitly setting the name attribute
 
-    def normalize(self, archive: "EntryArchive", logger: "BoundLogger") -> None:
+    def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
         super().normalize(archive, logger)
 
 
