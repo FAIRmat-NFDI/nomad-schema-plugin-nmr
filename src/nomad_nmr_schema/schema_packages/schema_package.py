@@ -619,6 +619,7 @@ class MagneticSusceptibility(PhysicalProperty):
     ) -> None:
         super().__init__(m_def, m_context, **kwargs)
         self.rank = [3, 3]  # ! move this to definitions
+        self.name = self.m_def.name  # Explicitly setting the name attribute
 
     def normalize(self, archive: "EntryArchive", logger: "BoundLogger") -> None:
         super().normalize(archive, logger)
