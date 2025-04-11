@@ -46,8 +46,26 @@ def resolve_name_from_entity_ref(entities: list[Entity], logger: 'BoundLogger') 
             )
             return ''
 
-        index = ''  # ! implement here if needed
-        name += f'{atoms_state.chemical_symbol}{index}'
+        index = ""  # ! implement here if needed
+        name += f"{atoms_state.chemical_symbol}{index}"
+    return name
+
+
+def resolve_name_for_single_tensor(class_name: str, logger: "BoundLogger") -> str:
+    """
+    Resolves the `name` for classes representing a single tensor, rather than
+    atom-resolved 'PhysicalProperty'. This function assigns a name based on the class
+    name or a custom label.
+
+    Args:
+        class_name (str): The name of the class or a custom label for the tensor.
+        logger ('BoundLogger'): The logger to log messages.
+
+    Returns:
+        (str): The resolved name for the tensor.
+    """
+    name = f"{class_name}Tensor"
+    logger.info(f"Resolved name for the single tensor: {name}")
     return name
 
 
@@ -633,6 +651,9 @@ class MagneticSusceptibility(PhysicalProperty):
 
     def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
         super().normalize(archive, logger)
+
+        # Use the generic resolve function to set the name
+        self.name = resolve_name_for_single_tensor(self.__class__.__name__, logger)
 
 
 class Outputs(BaseOutputs):
