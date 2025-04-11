@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from structlog.stdlib import BoundLogger
 
 from nomad.datamodel.metainfo.basesections import Entity
-from nomad.metainfo import MEnum, Quantity, SchemaPackage, Section, SubSection
+from nomad.metainfo import Quantity, SchemaPackage, Section, SubSection
 from nomad_simulations.schema_packages.atoms_state import AtomsState
 from nomad_simulations.schema_packages.outputs import Outputs as BaseOutputs
 from nomad_simulations.schema_packages.physical_property import PhysicalProperty
@@ -599,17 +599,12 @@ class MagneticSusceptibility(PhysicalProperty):
     Section containing the information of magnetic susceptibility tensor. Degree of
     magnetization of a material in the presence of a magnetic field.
 
+    See, e.g, https://doi.org/10.1039/9781837673179-00061.
+
     This tensor is identified by the 'sus' tag in the magres data block of a .magres file.
     """
 
     m_def = Section(validate=False)
-
-    approximation_type = Quantity(
-        type=MEnum("pGv-approximation", "vGv-approximation"),
-        description="""
-        Some DFT codes might split the magnetic susceptibility into that obtained by the pGv-approximation and obtained by the vGv-approximation.
-        """,
-    )
 
     value = Quantity(
         type=np.float64,
