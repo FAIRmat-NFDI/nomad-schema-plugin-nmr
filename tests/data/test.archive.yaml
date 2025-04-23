@@ -1,3 +1,6 @@
 data:
   m_def: nomad_nmr_schema.schema_packages.schema_package.MagneticSusceptibility
-  value: 3.4e-6  # Ensure the value is consistent with the unit "10 ** -6 * cm ** 3 / mol"
+  value:
+    - [-16.0397, 0.0000, 0.0000]
+    - [0.0000, -16.1160, 0.0000]
+    - [0.0000, 0.0000, -48.9908]
