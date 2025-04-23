@@ -618,7 +618,10 @@ class MagneticSusceptibility(PhysicalProperty):
 
     value = Quantity(
         type=np.float64,
-        unit='10 ** -6 * cm ** 3 / mol',
+        shape=[3, 3],
+        # unit='10 ** -6 * cm ** 3 / mol', # avoid adding a scaling factor in the units,
+        # any scaling may have to be done when displaying data on GUI, if so preferred.
+        unit='m ** 3 / mol',
         description="""
         Value of the macroscopic magnetic susceptibility tensor.
         """,
@@ -633,9 +636,6 @@ class MagneticSusceptibility(PhysicalProperty):
 
     def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
         super().normalize(archive, logger)
-
-        # Use the generic resolve function to set the name
-        self.name = resolve_name_for_single_tensor(self.__class__.__name__, logger)
 
 
 class Outputs(BaseOutputs):
