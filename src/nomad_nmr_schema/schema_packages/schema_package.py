@@ -166,19 +166,19 @@ class ElectricFieldGradient(PhysicalProperty):
         """,
     )
 
-    quadrupolar_coupling_constant = Quantity(
-        type=np.float64,
-        description="""
-        Quadrupolar coupling constant for each atom in the unit cell.
-        Once the eigenvalues of the EFG tensors are computed, it is computed as:
+    # quadrupolar_coupling_constant = Quantity(
+    #     type=np.float64,
+    #     description="""
+    #     Quadrupolar coupling constant for each atom in the unit cell.
+    #     Once the eigenvalues of the EFG tensors are computed, it is computed as:
 
-            quadrupolar_coupling_constant = efg_zz * e * Q / h
+    #         quadrupolar_coupling_constant = efg_zz * e * Q / h
 
-        where efg_zz is the largest eigenvalue of the EFG tensor,
-        Q is the nuclear quadrupole moment, e is the elementary charge, and
-        h is the Planck's constant.
-        """,
-    )
+    #     where efg_zz is the largest eigenvalue of the EFG tensor,
+    #     Q is the nuclear quadrupole moment, e is the elementary charge, and
+    #     h is the Planck's constant.
+    #     """,
+    # )
 
     asymmetry_parameter = Quantity(
         type=np.float64,
@@ -200,9 +200,6 @@ class ElectricFieldGradient(PhysicalProperty):
         self.rank = [3, 3]  # ! move this to definitions  !!! TODO
         self.name = self.m_def.name
 
-    def resolve_quadrupolar_coupling_constant(self, logger: 'BoundLogger') -> None:
-        pass
-
     def resolve_asymmetry_parameter(self, logger: 'BoundLogger') -> None:
         pass
 
@@ -214,8 +211,7 @@ class ElectricFieldGradient(PhysicalProperty):
             entities=[self.entity_ref], logger=logger
         )
 
-        # TODO add normalization to extract `quadrupolar_coupling_constant`
-        # and `asymmetry_parameter`
+        # TODO add normalization to extract `asymmetry_parameter`
 
 
 class ElectricFieldGradientLocal(PhysicalProperty):
