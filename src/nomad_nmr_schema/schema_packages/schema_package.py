@@ -51,6 +51,55 @@ def resolve_name_from_entity_ref(entities: list[Entity], logger: 'BoundLogger') 
     return name
 
 
+def extract_eigenvalues(
+    tensor: np.ndarray, logger: 'BoundLogger', convention: str = 's'
+) -> tuple[float, float, float] | None:
+    """
+    Extract the eigenvalues of a 3x3 tensor and sort them based on the specified
+    sorting method.
+
+    Conventions:
+    - 's' (Standard): Sort eigenvalues such that |val_zz| >= |val_yy| >= |val_xx|.
+    - 'h' (Haeberlen): Sort eigenvalues such that
+      |val_zz - val_iso| >= |val_xx - val_iso| >= |val_yy - val_iso|. Here,
+      val_iso is defined as the average of the three eigenvalues:
+      val_iso = np.trace(tensor) / 3.0
+
+    Args:
+        tensor (np.ndarray): The 3x3 tensor for which eigenvalues are to be extracted.
+        logger ('BoundLogger'): The logger to log messages.
+        convention (str, optional): Sorting convention. Defaults to 's'.
+            - 's': Standard sorting by absolute values.
+            - 'h': Haeberlen convention sorting.
+
+    Returns:
+        (Optional[tuple[float, float, float]]): The sorted eigenvalues.
+    """
+    try:
+        # Compute eigenvalues and eigenvectors, discard eigenvectors
+        eigenvalues, _ = np.linalg.eigh(tensor)
+
+        # Sort eigenvalues in ascending order
+        if convention == 's':
+            # Standard sorting by absolute values
+            sorted_eigenvalues = sorted(eigenvalues, key=abs)  # Sort by absolute value
+            # Returned sorted eigenvalues in increasing order
+            return sorted_eigenvalues[0], sorted_eigenvalues[1], sorted_eigenvalues[2]
+        elif convention == 'h':
+            # Haeberlen convention sorting
+            iso = np.trace(tensor) / 3.0  # Calculate isotropic value
+            sorted_eigenvalues = sorted(eigenvalues, key=lambda x: abs(x - iso))
+            # Return sorted eigenvalues with xx and yy swapped - Haeberlen convention
+            return sorted_eigenvalues[1], sorted_eigenvalues[0], sorted_eigenvalues[2]
+        else:
+            logger.error(f"Invalid convention '{convention}' specified.")
+            return None
+
+    except Exception as e:
+        logger.warning(f'Could not extract eigenvalues of the tensor: {e}')
+        return None
+
+
 class MagneticShielding(PhysicalProperty):
     """
     Nuclear response of a material to shield the effects of an applied external field.
