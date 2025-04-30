@@ -573,7 +573,7 @@ class IndirectSpinSpinCoupling(PhysicalProperty):
     under `ModelSystem.cell.atoms_state` using `entity_ref_1` and `entity_ref_2`.
     """
 
-    # TODO dipolar (or direct) coupling needs to be included at a higher level,
+    # TODO dipolar (or direct) coupling needs to be included at a higher level (app),
     # potentially calculated by Soprano python library to compute the overall spin-spin
     # coupling.
 
@@ -631,25 +631,74 @@ class IndirectSpinSpinCoupling(PhysicalProperty):
         See, https://pubs.acs.org/doi/full/10.1021/cr300108a.
         """,
     )
-
-    jcoupling_value = Quantity(
+    K_isotropic = Quantity(
         type=np.float64,
-        unit='hertz',
-        shape=[3, 3],  # dynamical shape only works for `PhysicalProperty.value`
+        unit='tesla ** 2 / joule',
         description="""
-        The J-coupling tensor J_ij is obtained from the indirect spin-spin coupling
-        using:
+        The isotropic component of the reduced spin coupling tensor. The isotropic
+        value is defined as the average of the three principal components of the
+        reduced spin coupling tensor:
 
-            jcoupling_value = (value *
-                                gyromagnetic_ratio_i *
-                                gyromagnetic_ratio_j *
-                                2 *
-                                np.pi *
-                                hbar)
+            K_isotropic = (K_xx + K_yy + K_zz) / 3
 
-        where i, j runs for each atom in the unit cell.
+        where K_xx, K_yy, and K_zz are the eigenvalues of the reduced spin coupling
+        tensor, sorted based on Haeberlen convention (see `extract_eigenvalues()`
+        function).
 
-        See, e.g, https://pubs.acs.org/doi/10.1021/cr300108a.
+        Alternatively, this is 1/3 of the trace of the reduced spin coupling tensor (see
+        `extract_isotropic_part()` function below). Both formulas evaluate to the same
+        numerical value.
+        """,
+    )
+    K_symmetric = Quantity(
+        type=np.float64,
+        shape=[3, 3],
+        unit='tesla ** 2 / joule',
+        description="""
+        The symmetric component of the reduced spin coupling tensor. This is defined as:
+
+            K_symmetric = (K + K.T) / 2
+
+        where K is the reduced spin coupling tensor, K.T is the transposed K tensor.
+        """,
+    )
+    K_asymmetric = Quantity(
+        type=np.float64,
+        shape=[3, 3],
+        unit='tesla ** 2 / joule',
+        description="""
+        The asymmetric component of the reduced spin coupling tensor. This is defined as:
+
+            K_asymmetric = (K - K.T) / 2
+
+        where K is the reduced spin coupling tensor, K.T is the transposed K tensor.
+        """,
+    )
+    K_anisotropy = Quantity(
+        type=np.float64,
+        unit='tesla ** 2 / joule',
+        description="""
+        The reduced spin couling anisotropy is defined as:
+
+            isc_anisotropy = K_zz - (K_xx + K_yy) / 2.0
+
+        where K_xx, K_yy, and K_zz are the eigenvalues of the reduced spin coupling
+        tensor, sorted based on Haeberlen convention (see `extract_eigenvalues()`
+        function).
+        """,
+    )
+    K_principal_component_asymmetry = Quantity(
+        type=np.float64,
+        unit='tesla ** 2 / joule',
+        description="""
+        The principal component asymmetry is defined as:
+
+            K_principal_component_asymmetry = (K_yy - K_xx) / (Kzz - K_isotropic)
+
+        where K_xx, K_yy, and K_zz are the eigenvalues of the reduced spin coupling
+        tensor, sorted based on Haeberlen convention (see `extract_eigenvalues()`
+        function) and K_isotropic is the isotropic component of the tensor, as
+        calculated before.
         """,
     )
 
@@ -669,14 +718,31 @@ class IndirectSpinSpinCoupling(PhysicalProperty):
         """,
     )
 
+    def extract_isotropic_part(self, logger: 'BoundLogger') -> float | None:
+        """
+        Extract the isotropic component of the reduced spin coupling tensor. This is 1/3
+        of the trace of the reduced spin coupling tensor `value`.
+
+        Args:
+            logger ('BoundLogger'): The logger to log messages.
+
+        Returns:
+            (Optional[float]): The isotropic component of the reduced spin coupling
+            tensor.
+        """
+        try:
+            # Calculate the isotropic value
+            isotropic = np.trace(np.array(self.value)) / 3.0
+        except Exception:
+            logger.warning('Could not extract the trace of the `value` tensor.')
+            return None
+        return isotropic
+
     def __init__(
         self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
     ) -> None:
         super().__init__(m_def, m_context, **kwargs)
         self.rank = [3, 3]  # ! move this to definitions
-
-    def resolve_jcoupling_value(self, logger: 'BoundLogger') -> None:
-        pass
 
     def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
         super().normalize(archive, logger)
@@ -686,7 +752,58 @@ class IndirectSpinSpinCoupling(PhysicalProperty):
             entities=[self.entity_ref_1, self.entity_ref_2], logger=logger
         )
 
-        # TODO add normalization to extract `jcoupling_value` from `value`
+        # Calculate the isotropic component (K_isotropic)
+        isotropic = self.extract_isotropic_part(logger)
+        if isotropic is not None:
+            logger.info(f'Appending isotropic value for {self.name}')
+            self.K_isotropic = isotropic
+        else:
+            logger.warning(f'Isotropic value extraction failed for {self.name}')
+
+        # Calculate the symmetric and asymmetric components
+        try:
+            tensor = np.array(self.value)
+            self.K_symmetric = (tensor + tensor.T) / 2.0
+            self.K_asymmetric = (tensor - tensor.T) / 2.0
+            logger.info(f'K_symmetric for {self.name}: {self.K_symmetric}')
+            logger.info(f'K_asymmetric for {self.name}: {self.K_asymmetric}')
+        except Exception as e:
+            logger.warning(
+                f'Failed to calculate symmetric/asymmetric components for '
+                f'{self.name}: {e}'
+            )
+
+        # Extract eigenvalues using the Haeberlen convention
+        eigenvalues_haeberlen = extract_eigenvalues(
+            np.array(self.value), logger, convention='h'
+        )
+        if eigenvalues_haeberlen is not None:
+            K_xx, K_yy, K_zz = eigenvalues_haeberlen
+            logger.info(
+                f'Eigenvalues for {self.name} (Haeberlen convention): '
+                f'K_xx={K_xx}, K_yy={K_yy}, K_zz={K_zz}'
+            )
+
+            # Calculate K_anisotropy
+            self.K_anisotropy = K_zz - (K_xx + K_yy) / 2.0
+            logger.info(f'K_anisotropy for {self.name}: {self.K_anisotropy}')
+
+            # Calculate K_principal_component_asymmetry
+            if (K_zz - self.K_isotropic) != 0:
+                self.K_principal_component_asymmetry = (K_yy - K_xx) / (
+                    K_zz - self.K_isotropic
+                )
+                logger.info(
+                    f'K_principal_component_asymmetry for {self.name}: '
+                    f'{self.K_principal_component_asymmetry}'
+                )
+            else:
+                logger.warning(
+                    f'Cannot calculate K_principal_component_asymmetry for {self.name} '
+                    f'as (K_zz - K_isotropic) is zero.'
+                )
+        else:
+            logger.warning(f'Failed to extract eigenvalues for {self.name}')
 
 
 class IndirectSpinSpinCouplingFermiContact(PhysicalProperty):
