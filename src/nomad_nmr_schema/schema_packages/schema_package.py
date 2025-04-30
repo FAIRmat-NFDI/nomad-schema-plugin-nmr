@@ -667,7 +667,8 @@ class IndirectSpinSpinCoupling(PhysicalProperty):
         shape=[3, 3],
         unit='tesla ** 2 / joule',
         description="""
-        The asymmetric component of the reduced spin coupling tensor. This is defined as:
+        The asymmetric component of the reduced spin coupling tensor. This is defined
+        as:
 
             K_asymmetric = (K - K.T) / 2
 
