@@ -123,15 +123,111 @@ class MagneticShielding(PhysicalProperty):
         Value of the magnetic shielding tensor per atom.
         """,
     )
-    value_isotropic = Quantity(
+    ms_isotropic = Quantity(
         type=np.float64,
         unit='dimensionless',
         description="""
-            The isotropic part of the `MagneticShieldingTensor`. This is 1/3 of the
-            trace of the magnetic shielding tensor (see `extract_isotropic_part()`
-            function in `MagneticShieldingTensor`).
+        The isotropic component of the `MagneticShielding` tensor. The isotropic
+        magnetic shielding is defined as the average of the three principal components
+        of the magnetic shielding tensor:
 
-            See, e.g, https://pubs.acs.org/doi/10.1021/cr300108a.
+            ms_isotropic = (sigma_xx + sigma_yy + sigma_zz) / 3
+
+        where sigma_xx, sigma_yy, and sigma_zz are the eigenvalues of the magnetic
+        shielding tensor, sorted based on Haeberlen convention (see
+        `extract_eigenvalues()` function).
+
+        Alternatively, this is 1/3 of the trace of the magnetic shielding tensor (see
+        `extract_isotropic_part()` function below). Both formulas evaluate to the same
+        numerical value.
+
+        See, e.g, https://doi.org/10.1039/C6CC02542K.
+        """,
+    )
+    ms_anisotropy = Quantity(
+        type=np.float64,
+        unit='dimensionless',
+        description="""
+        The magnetic shielding anisotropy is defined as:
+
+            ms_anisotropy = sigma_zz - (sigma_xx + sigma_yy) / 2.0
+
+        where sigma_xx, sigma_yy, and sigma_zz are the eigenvalues of the magnetic
+        shielding tensor, sorted based on the Haeberlen convention (see
+        `extract_eigenvalues()` function).
+
+        See, e.g, https://doi.org/10.1039/C6CC02542K.
+        """,
+    )
+    ms_reduced_anisotropy = Quantity(
+        type=np.float64,
+        unit='dimensionless',
+        description="""
+        The reduced anisotropy is defined as:
+
+            ms_reduced_anisotropy = sigma_zz - ms_isotropic
+
+        where sigma_zz is the eigenvalue of the magnetic shielding tensor with the
+        largest deviation from the isotropic value as per Haeberlen convention (see
+        `extract_eigenvalues()` function) and ms_isotropic is the isotropic component of
+        the tensor, defined as:
+
+            ms_isotropic = (sigma_xx + sigma_yy + sigma_zz) / 3.
+
+        See, e.g, https://doi.org/10.1039/C6CC02542K.
+        """,
+    )
+    ms_asymmetry = Quantity(
+        type=np.float64,
+        unit='dimensionless',
+        description="""
+        The magnetic shielding asymmetry is defined as:
+
+            ms_asymmetry = (sigma_yy - sigma_xx) / ms_reduced_anisotropy
+
+        where sigma_xx, sigma_yy, and sigma_zz are the eigenvalues of the magnetic
+        shielding tensor, sorted based on the Haeberlen convention (see
+        `extract_eigenvalues()` function) and ms_reduced_anisotropy is defined as:
+
+            ms_reduced_anisotropy = sigma_zz - ms_isotropic
+
+        See, e.g, https://doi.org/10.1039/C6CC02542K.
+        """,
+    )
+    ms_span = Quantity(
+        type=np.float64,
+        unit='dimensionless',
+        description="""
+        The span is defined as:
+
+            ms_span = sigma_33 - sigma_11
+
+        where sigma_11, sigma_22, and sigma_33 are the eigenvalues of the magnetic
+        shielding tensor, sorted based on the standard convention (see
+        `extract_eigenvalues()` function). The span quantifies the range of the
+        spectrum being analysed.
+
+        See, e.g, https://doi.org/10.1039/C6CC02542K.
+        """,
+    )
+
+    ms_skew = Quantity(
+        type=np.float64,
+        unit='dimensionless',
+        description="""
+        The skew is defined as:
+
+            ms_skew = 3 * (ms_isotropic - sigma_22) / ms_span
+
+        where sigma_11, sigma_22, and sigma_33 are the eigenvalues of the magnetic
+        shielding tensor, sorted based on the standard convention (see
+        `extract_eigenvalues()` function) ms_isotropic is the isotropic component of the
+        tensor, as calculated before.
+
+        This parameter quantifies the asymmetry of the magnetic shielding tensor around
+        its isotropic value.
+
+        See, e.g, https://doi.org/10.1039/C6CC02542K.
         """,
     )
 
@@ -145,14 +241,14 @@ class MagneticShielding(PhysicalProperty):
 
     def extract_isotropic_part(self, logger: 'BoundLogger') -> float | None:
         """
-        Extract the isotropic part of the magnetic shielding tensor. This is 1/3 of the
-        trace of the magnetic shielding tensor `value`.
+        Extract the isotropic component of the magnetic shielding tensor. This is 1/3 of
+        the trace of the magnetic shielding tensor `value`.
 
         Args:
             logger ('BoundLogger'): The logger to log messages.
 
         Returns:
-            (Optional[float]): The isotropic part of the magnetic shielding tensor.
+            (Optional[float]): The isotropic component of the magnetic shielding tensor.
         """
         try:
             # Calculate the isotropic value
@@ -174,9 +270,75 @@ class MagneticShielding(PhysicalProperty):
         isotropic = self.extract_isotropic_part(logger)
         if isotropic is not None:
             logger.info(f'Appending isotropic value for {self.name}')
-            self.value_isotropic = isotropic
+            self.ms_isotropic = isotropic
         else:
             logger.warning(f'Isotropic value extraction failed for {self.name}')
+
+        # Extract eigenvalues by Haeberlen convention and calculate magnetic shielding
+        # anisotropy, reduced anisotropy, and asymmetry.
+        eigenvalues_haeberlen = extract_eigenvalues(
+            np.array(self.value), logger, convention='h'
+        )
+        if eigenvalues_haeberlen is not None:
+            sigma_xx, sigma_yy, sigma_zz = eigenvalues_haeberlen
+            logger.info(
+                f'Eigenvalues for {self.name} (Haeberlen convention): '
+                f'sigma_xx={sigma_xx}, sigma_yy={sigma_yy}, sigma_zz={sigma_zz}'
+            )
+
+            # Calculate ms_anisotropy
+            self.ms_anisotropy = sigma_zz - (sigma_xx + sigma_yy) / 2.0
+            logger.info(
+                f'Magnetic shielding anisotropy for {self.name}: {self.ms_anisotropy}'
+            )
+
+            # Calculate ms_reduced_anisotropy
+            self.ms_reduced_anisotropy = sigma_zz - self.ms_isotropic
+            logger.info(
+                f'Magnetic shielding reduced anisotropy for {self.name}: '
+                f'{self.ms_reduced_anisotropy}'
+            )
+
+            # Calculate ms_asymmetry
+            if self.ms_reduced_anisotropy != 0:
+                self.ms_asymmetry = (sigma_yy - sigma_xx) / self.ms_reduced_anisotropy
+                logger.info(
+                    f'Magnetic shielding asymmetry for {self.name}: {self.ms_asymmetry}'
+                )
+            else:
+                logger.warning(
+                    f'Cannot calculate Magnetic shielding asymmetry for {self.name} as '
+                    f'reduced anisotropy is zero.'
+                )
+        else:
+            logger.warning(f'Failed to extract eigenvalues for {self.name}')
+            return  # Exit early if eigenvalues extraction fails
+
+        # Extract eigenvalues by standard convention to calculate span and skew.
+        eigenvalues_standard = extract_eigenvalues(
+            np.array(self.value), logger, convention='s'
+        )
+        if eigenvalues_standard is not None:
+            sigma_11, sigma_22, sigma_33 = eigenvalues_standard
+            logger.info(
+                f'Eigenvalues for {self.name} (Standard convention): '
+                f'sigma_11={sigma_11}, sigma_22={sigma_22}, sigma_33={sigma_33}'
+            )
+
+            # Calculate ms_span
+            self.ms_span = sigma_33 - sigma_11
+            logger.info(f'Magnetic Shielding Span for {self.name}: {self.ms_span}')
+
+            # Calculate ms_skew
+            if self.ms_span != 0:
+                self.ms_skew = 3 * (self.ms_isotropic - sigma_22) / self.ms_span
+                logger.info(f'Magnetic Shielding skew for {self.name}: {self.ms_skew}')
+            else:
+                logger.warning(
+                    f'Cannot calculate ms_skew for {self.name} as ms_span is zero.'
+                )
+        else:
+            logger.warning(f'Failed to extract eigenvalues for {self.name}')
 
 
 class ElectricFieldGradient(PhysicalProperty):
