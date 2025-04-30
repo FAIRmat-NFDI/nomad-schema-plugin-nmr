@@ -977,6 +977,28 @@ class MagneticSusceptibility(PhysicalProperty):
         """,
     )
 
+    value_vgv_approx = Quantity(
+        type=np.float64,
+        shape=[3, 3],
+        unit='m ** 3 / mol',
+        description="""
+        Approximate magnetic susceptibility tensor (vGv approximation). This tensor
+        is typically provided by DFT codes such as VASP and represents an approximate
+        calculation of the magnetic susceptibility.
+        """,
+    )
+
+    value_pgv_approx = Quantity(
+        type=np.float64,
+        shape=[3, 3],
+        unit='m ** 3 / mol',
+        description="""
+        Approximate magnetic susceptibility tensor (pGv approximation). This tensor
+        is typically provided by DFT codes such as VASP and represents an approximate
+        calculation of the magnetic susceptibility.
+        """,
+    )
+
     def __init__(
         self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
     ) -> None:
@@ -986,6 +1008,22 @@ class MagneticSusceptibility(PhysicalProperty):
 
     def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
         super().normalize(archive, logger)
+
+        # Log information about the tensors if they are present
+        if hasattr(self, 'value') and self.value is not None:
+            logger.info(f'Magnetic susceptibility tensor for {self.name}: {self.value}')
+
+        if hasattr(self, 'value_vgv_approx') and self.value_vgv_approx is not None:
+            logger.info(
+                f'Approximate magnetic susceptibility tensor (vGv) for {self.name}: '
+                f'{self.value_vgv_approx}'
+            )
+
+        if hasattr(self, 'value_pgv_approx') and self.value_pgv_approx is not None:
+            logger.info(
+                f'Approximate magnetic susceptibility tensor (pGv) for {self.name}: '
+                f'{self.value_pgv_approx}'
+            )
 
 
 class Outputs(BaseOutputs):
