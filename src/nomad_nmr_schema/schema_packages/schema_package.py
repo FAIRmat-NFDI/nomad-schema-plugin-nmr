@@ -418,9 +418,6 @@ class ElectricFieldGradient(PhysicalProperty):
         self.rank = [3, 3]  # ! move this to definitions  !!! TODO
         self.name = self.m_def.name
 
-    def resolve_asymmetry_parameter(self, logger: 'BoundLogger') -> None:
-        pass
-
     def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
         super().normalize(archive, logger)
 
