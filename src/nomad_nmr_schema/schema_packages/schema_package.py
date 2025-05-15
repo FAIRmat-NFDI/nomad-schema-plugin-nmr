@@ -932,12 +932,6 @@ class Outputs(BaseOutputs):
     electric_field_gradients = SubSection(
         sub_section=ElectricFieldGradient.m_def, repeats=True
     )
-    electric_field_gradients_local = SubSection(
-        sub_section=ElectricFieldGradientLocal.m_def, repeats=True
-    )
-    electric_field_gradients_nonlocal = SubSection(
-        sub_section=ElectricFieldGradientNonlocal.m_def, repeats=True
-    )
     indirect_spin_spin_couplings = SubSection(
         sub_section=IndirectSpinSpinCoupling.m_def, repeats=True
     )
