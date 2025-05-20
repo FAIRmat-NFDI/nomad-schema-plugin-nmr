@@ -1,12 +1,15 @@
 import numpy as np
 import pytest
 
-from nomad_nmr_schema.schema_packages.tensor_utils import (NMRTensor,
-                                                           TensorConvention,
-                                                           _anisotropy,
-                                                           _asymmetry,
-                                                           _evals_sort, _skew,
-                                                           _span)
+from nomad_nmr_schema.schema_packages.tensor_utils import (
+    NMRTensor,
+    TensorConvention,
+    _anisotropy,
+    _asymmetry,
+    _evals_sort,
+    _skew,
+    _span,
+)
 
 
 def test_tensor_initialization():
@@ -48,7 +51,8 @@ def test_eigenvalue_ordering():
     )
 
 def test_haeberlen_convention():
-    # Create a tensor that follows Haeberlen convention: |σzz - σiso| ≥ |σxx - σiso| ≥ |σyy - σiso|
+    # Create a tensor following Haeberlen convention:
+    # |σzz - σiso| ≥ |σxx - σiso| ≥ |σyy - σiso|
     matrix = np.array([[10.0, 0.0, 0.0],
                       [0.0, 20.0, 0.0],
                       [0.0, 0.0, 30.0]])

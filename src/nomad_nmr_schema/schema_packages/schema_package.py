@@ -1,18 +1,17 @@
 from typing import TYPE_CHECKING
 
 import numpy as np
+from structlog.stdlib import BoundLogger
 
 if TYPE_CHECKING:
     from nomad.datamodel.datamodel import EntryArchive
     from nomad.metainfo import Context, Section
-    from structlog.stdlib import BoundLogger
 
 from nomad.datamodel.metainfo.basesections import Entity
 from nomad.metainfo import Quantity, SchemaPackage, Section, SubSection
 from nomad_simulations.schema_packages.atoms_state import AtomsState
 from nomad_simulations.schema_packages.outputs import Outputs as BaseOutputs
-from nomad_simulations.schema_packages.physical_property import \
-    PhysicalProperty
+from nomad_simulations.schema_packages.physical_property import PhysicalProperty
 
 from .tensor_utils import NMRTensor, TensorConvention
 
@@ -117,8 +116,8 @@ class MagneticShielding(PhysicalProperty):
             reduced_anisotropy = sigma_zz - isotropy
 
         where sigma_zz is the eigenvalue of the magnetic shielding tensor with the
-        largest deviation from the isotropy value as per Haeberlen convention function) and isotropy is the isotropy component of
-        the tensor, defined as:
+        largest deviation from the isotropy value as per Haeberlen convention.
+        For clarity, isotropy is defined as:
 
             isotropy = (sigma_xx + sigma_yy + sigma_zz) / 3.
 
@@ -134,7 +133,7 @@ class MagneticShielding(PhysicalProperty):
             asymmetry = (sigma_yy - sigma_xx) / reduced_anisotropy
 
         where sigma_xx, sigma_yy, and sigma_zz are the eigenvalues of the magnetic
-        shielding tensor, sorted based on the Haeberlen convention function) and reduced_anisotropy is defined as:
+        shielding tensor, sorted based on the Haeberlen convention function).
 
             reduced_anisotropy = sigma_zz - isotropy
 
@@ -150,8 +149,7 @@ class MagneticShielding(PhysicalProperty):
             span = sigma_33 - sigma_11
 
         where sigma_11, sigma_22, and sigma_33 are the eigenvalues of the magnetic
-        shielding tensor, sorted based on the standard convention function). The span quantifies the range of the
-        spectrum being analysed.
+        shielding tensor, sorted based on the standard convention function.
 
         See, e.g, https://doi.org/10.1039/C6CC02542K.
         """,
@@ -166,8 +164,7 @@ class MagneticShielding(PhysicalProperty):
             skew = 3 * (isotropy - sigma_22) / span
 
         where sigma_11, sigma_22, and sigma_33 are the eigenvalues of the magnetic
-        shielding tensor, sorted based on the standard convention function) isotropy is the isotropy component of the
-        tensor, as calculated before.
+        shielding tensor, sorted based on the standard convention function.
 
         This parameter quantifies the asymmetry of the magnetic shielding tensor around
         its isotropy value.
@@ -199,18 +196,21 @@ class MagneticShielding(PhysicalProperty):
         # Initialise the tensor with the Haeberlen convention
         tensor = NMRTensor(np.array(self.value), TensorConvention.Haeberlen)
 
-        # isotropy value
+        # Calculate properties
         self.isotropy = tensor.isotropy
-        logger.info(f'Appending isotropy value for {self.name}: {self.isotropy}')
-
-        # Anisotropy and asymmetry (using Haeberlen convention)
         self.anisotropy = tensor.anisotropy
         self.reduced_anisotropy = tensor.reduced_anisotropy
         self.asymmetry = tensor.asymmetry
 
-        logger.info(f'Magnetic shielding anisotropy for {self.name}: {self.anisotropy}')
-        logger.info(f'Magnetic shielding reduced anisotropy for {self.name}: {self.reduced_anisotropy}')
-        logger.info(f'Magnetic shielding asymmetry for {self.name}: {self.asymmetry}')
+        # Log all properties
+        props = {
+            'isotropy': self.isotropy,
+            'anisotropy': self.anisotropy,
+            'reduced_anisotropy': self.reduced_anisotropy,
+            'asymmetry': self.asymmetry,
+        }
+        for prop, value in props.items():
+            logger.info(f'MS {prop} for {self.name}: {value}')
 
         # Span and skew
         self.span = tensor.span
@@ -295,7 +295,8 @@ class ElectricFieldGradient(PhysicalProperty):
 
 class BaseIndirectSpinSpinCoupling(PhysicalProperty):
     """
-    Base class for all indirect spin-spin coupling classes. This represents the common structure
+    Base class for all indirect spin-spin coupling classes. This represents the
+    common structure
     and behavior of various types of indirect spin-spin couplings in NMR.
 
     This is used as a base for:
