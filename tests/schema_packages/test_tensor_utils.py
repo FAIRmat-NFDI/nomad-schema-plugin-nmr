@@ -14,9 +14,7 @@ from nomad_nmr_schema.schema_packages.tensor_utils import (
 
 def test_tensor_initialization():
     # Test initialization with 3x3 matrix
-    matrix = np.array([[1.0, 0.5, 0.0],
-                      [0.5, 2.0, 0.0],
-                      [0.0, 0.0, 3.0]])
+    matrix = np.array([[1.0, 0.5, 0.0], [0.5, 2.0, 0.0], [0.0, 0.0, 3.0]])
     tensor = NMRTensor(matrix)
     assert isinstance(tensor, NMRTensor)
 
@@ -30,32 +28,28 @@ def test_tensor_initialization():
     with pytest.raises(ValueError):
         NMRTensor(np.array([1, 2, 3]))  # Wrong shape
 
+
 def test_eigenvalue_ordering():
     # Create a tensor with known eigenvalues
-    matrix = np.array([[2.0, 0.0, 0.0],
-                      [0.0, 1.0, 0.0],
-                      [0.0, 0.0, 3.0]])
+    matrix = np.array([[2.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 3.0]])
 
     # Test increasing order
     tensor_inc = NMRTensor(matrix, order=TensorConvention.Increasing)
     np.testing.assert_array_almost_equal(
-        tensor_inc.eigenvalues,
-        np.array([1.0, 2.0, 3.0])
+        tensor_inc.eigenvalues, np.array([1.0, 2.0, 3.0])
     )
 
     # Test decreasing order
     tensor_dec = NMRTensor(matrix, order=TensorConvention.Decreasing)
     np.testing.assert_array_almost_equal(
-        tensor_dec.eigenvalues,
-        np.array([3.0, 2.0, 1.0])
+        tensor_dec.eigenvalues, np.array([3.0, 2.0, 1.0])
     )
+
 
 def test_haeberlen_convention():
     # Create a tensor following Haeberlen convention:
     # |σzz - σiso| ≥ |σxx - σiso| ≥ |σyy - σiso|
-    matrix = np.array([[10.0, 0.0, 0.0],
-                      [0.0, 20.0, 0.0],
-                      [0.0, 0.0, 30.0]])
+    matrix = np.array([[10.0, 0.0, 0.0], [0.0, 20.0, 0.0], [0.0, 0.0, 30.0]])
 
     tensor = NMRTensor(matrix, order=TensorConvention.Haeberlen)
     evals = tensor.eigenvalues
@@ -70,11 +64,10 @@ def test_haeberlen_convention():
 
     assert dev_zz >= dev_xx >= dev_yy
 
+
 def test_nqr_convention():
     # Create a tensor that follows NQR convention: |Vzz| ≥ |Vyy| ≥ |Vxx|
-    matrix = np.array([[-2.0, 0.0, 0.0],
-                      [0.0, -1.0, 0.0],
-                      [0.0, 0.0, 3.0]])
+    matrix = np.array([[-2.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 3.0]])
 
     tensor = NMRTensor(matrix, order=TensorConvention.NQR)
     evals = tensor.eigenvalues
@@ -82,13 +75,12 @@ def test_nqr_convention():
     # Verify NQR ordering: |Vzz| ≥ |Vyy| ≥ |Vxx|
     assert abs(evals[2]) >= abs(evals[1]) >= abs(evals[0])
 
+
 def test_invalid_convention():
-    matrix = np.array([[1.0, 0.0, 0.0],
-                      [0.0, 2.0, 0.0],
-                      [0.0, 0.0, 3.0]])
+    matrix = np.array([[1.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 3.0]])
 
     with pytest.raises(ValueError):
-        NMRTensor(matrix, order="invalid")
+        NMRTensor(matrix, order='invalid')
 
 
 def test_span():
@@ -98,16 +90,19 @@ def test_span():
     assert _span(evals) == pytest.approx(expected_span)
 
     # Multiple tensors at once
-    evals = np.array([
-        [1.0, 2.0, 3.0],
-        [-1.0, 0.0, 1.0],
-    ])
+    evals = np.array(
+        [
+            [1.0, 2.0, 3.0],
+            [-1.0, 0.0, 1.0],
+        ]
+    )
     expected_spans = np.array([2.0, 2.0])  # [3.0-1.0, 1.0-(-1.0)]
     np.testing.assert_array_almost_equal(_span(evals), expected_spans)
 
     # Zero span case
     evals = np.array([[2.0, 2.0, 2.0]])
     assert _span(evals) == pytest.approx(0.0)
+
 
 def test_skew():
     # Test skew calculation for a simple diagonal tensor
@@ -119,10 +114,16 @@ def test_skew():
     assert _skew(evals) == pytest.approx(0.0)
 
     # Test skew for multiple tensors
-    evals = np.array([
-        [1.0, 2.0, 3.0],  # skew = 0
-        [0.0, 1.0, 4.0],  # iso = 5/3, median = 1, span = 4, skew = 3*(5/3 - 1)/4 = 0.5
-    ])
+    evals = np.array(
+        [
+            [1.0, 2.0, 3.0],  # skew = 0
+            [
+                0.0,
+                1.0,
+                4.0,
+            ],  # iso = 5/3, median = 1, span = 4, skew = 3*(5/3 - 1)/4 = 0.5
+        ]
+    )
     expected_skews = np.array([0.0, 0.5])
     np.testing.assert_array_almost_equal(_skew(evals), expected_skews)
 
@@ -130,6 +131,7 @@ def test_skew():
     # since skew is undefined
     evals = np.array([[2.0, 2.0, 2.0]])
     assert _skew(evals) == pytest.approx(0.0)
+
 
 def test_anisotropy():
     # Test regular anisotropy
@@ -141,17 +143,20 @@ def test_anisotropy():
 
     # Test reduced anisotropy
     # reduced_aniso = aniso * 2/3 = 2.5 * 2/3
-    assert _anisotropy(sorted_evals, reduced=True) == pytest.approx(2.5 * 2/3)
+    assert _anisotropy(sorted_evals, reduced=True) == pytest.approx(2.5 * 2 / 3)
 
     # Test multiple tensors
-    evals = np.array([
-        [1.0, 2.0, 4.0],  # aniso = 2.5
-        [10.0, 20.0, 40.0],  # aniso = 25
-        [2, 1, -6], # aniso = -7.5
-    ])
+    evals = np.array(
+        [
+            [1.0, 2.0, 4.0],  # aniso = 2.5
+            [10.0, 20.0, 40.0],  # aniso = 25
+            [2, 1, -6],  # aniso = -7.5
+        ]
+    )
     sorted_evals = _evals_sort(evals, TensorConvention.Haeberlen)
     expected_aniso = np.array([2.5, 25.0, -7.5])
     np.testing.assert_array_almost_equal(_anisotropy(sorted_evals), expected_aniso)
+
 
 def test_asymmetry():
     # Test asymmetry calculation
@@ -168,10 +173,12 @@ def test_asymmetry():
     assert _asymmetry(sorted_evals) == pytest.approx(0.0)
 
     # Test multiple tensors
-    evals = np.array([
-        [1.0, 2.0, 4.0],  # asymmetry = 0.6
-        [1.0, 1.0, 2.0],  # asymmetry = 0.0
-    ])
+    evals = np.array(
+        [
+            [1.0, 2.0, 4.0],  # asymmetry = 0.6
+            [1.0, 1.0, 2.0],  # asymmetry = 0.0
+        ]
+    )
     sorted_evals = _evals_sort(evals, TensorConvention.Haeberlen)
     expected_asymmetry = np.array([0.6, 0.0])
     np.testing.assert_array_almost_equal(_asymmetry(sorted_evals), expected_asymmetry)

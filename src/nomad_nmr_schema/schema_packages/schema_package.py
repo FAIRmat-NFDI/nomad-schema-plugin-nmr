@@ -434,7 +434,6 @@ class BaseIndirectSpinSpinCoupling(PhysicalProperty):
         logger.info(f'asymmetry for {self.name}: {self.asymmetry}')
 
 
-
 class IndirectSpinSpinCoupling(BaseIndirectSpinSpinCoupling):
     """
     Indirect exchanges or interactions between 2 nuclear spins that arises from

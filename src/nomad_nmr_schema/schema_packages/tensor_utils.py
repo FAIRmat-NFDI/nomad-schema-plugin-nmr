@@ -32,11 +32,12 @@ ISOTROPIC_ZERO_TOLERANCE: float = 1e-6
 TENSOR_DIMENSION: int = 3
 EIGENVALUE_TRIPLET_SIZE: int = 2
 
+
 class TensorConvention(str, Enum):
-    Haeberlen = "h"
-    Increasing = "i"
-    Decreasing = "d"
-    NQR = "n"
+    Haeberlen = 'h'
+    Increasing = 'i'
+    Decreasing = 'd'
+    NQR = 'n'
 
     def sort_eigenvalues(
         self, evals: np.ndarray
@@ -74,11 +75,11 @@ class TensorConvention(str, Enum):
             # Sort by absolute values for NQR convention
             if np.any(np.abs(iso) > ISOTROPIC_ZERO_TOLERANCE):
                 warnings.warn(
-                    f"Isotropic values are not zero ({iso}), "
-                    f"but NQR order is requested.\n"
+                    f'Isotropic values are not zero ({iso}), '
+                    f'but NQR order is requested.\n'
                     "If you're dealing with an EFG tensor, "
-                    "then check it carefully since these should be traceless.\n"
-                    "Sorting by absolute values.\n"
+                    'then check it carefully since these should be traceless.\n'
+                    'Sorting by absolute values.\n'
                 )
             sorted_idx = np.argsort(np.abs(evals), axis=1)
 
@@ -95,13 +96,14 @@ class TensorConvention(str, Enum):
             'd': cls.Decreasing,
             'decreasing': cls.Decreasing,
             'n': cls.NQR,
-            'nqr': cls.NQR
+            'nqr': cls.NQR,
         }
 
         try:
             return conversion_map[normalized]
         except KeyError:
-            raise ValueError(f"Invalid convention: {input_str}")
+            raise ValueError(f'Invalid convention: {input_str}')
+
 
 class NMRTensor:
     """NMRTensor class for handling NMR tensor operations and representations.
@@ -118,9 +120,11 @@ class NMRTensor:
         ORDER_NQR: Sort using NQR convention
     """
 
-    def __init__(self,
-                 data: np.ndarray | tuple[np.ndarray, np.ndarray],
-                 order: str | TensorConvention = TensorConvention.Increasing):
+    def __init__(
+        self,
+        data: np.ndarray | tuple[np.ndarray, np.ndarray],
+        order: str | TensorConvention = TensorConvention.Increasing,
+    ):
         """Initialize the NMRTensor.
 
         Args:
@@ -164,13 +168,13 @@ class NMRTensor:
             ValueError: If data format or dimensions are invalid
         """
         if not isinstance(data, np.ndarray | tuple | list):
-            raise ValueError("Data must be a numpy array, tuple, or list")
+            raise ValueError('Data must be a numpy array, tuple, or list')
 
         if len(data) == TENSOR_DIMENSION:
             self._data = np.array(data, dtype=float)
             if self._data.shape != (TENSOR_DIMENSION, TENSOR_DIMENSION):
-                dims = f"{TENSOR_DIMENSION}, {TENSOR_DIMENSION}"
-                raise ValueError(f"Matrix data must have shape ({dims})")
+                dims = f'{TENSOR_DIMENSION}, {TENSOR_DIMENSION}'
+                raise ValueError(f'Matrix data must have shape ({dims})')
             self._symm = (self._data + self._data.T) / 2.0
             evals, evecs = np.linalg.eigh(self._symm)
         elif len(data) == EIGENVALUE_TRIPLET_SIZE:
@@ -179,18 +183,18 @@ class NMRTensor:
             evecs = np.array(evecs, dtype=float)
             if evals.shape != (3,) or evecs.shape != (3, 3):
                 raise ValueError(
-                    "Eigenvalues must have shape (3,) and eigenvectors shape (3, 3)"
+                    'Eigenvalues must have shape (3,) and eigenvectors shape (3, 3)'
                 )
             self._symm = np.linalg.multi_dot([evecs, np.diag(evals), evecs.T])
             self._data = self._symm
         else:
             raise ValueError(
-                "Data must be a 3x3 matrix or a pair of [eigenvalues, eigenvectors]"
+                'Data must be a 3x3 matrix or a pair of [eigenvalues, eigenvectors]'
             )
 
         rtol = EIGENVALUE_EQUALITY_TOLERANCE
         if not np.allclose(evecs @ evecs.T, np.eye(3), rtol=rtol):
-            raise ValueError("Eigenvectors must form an orthogonal matrix")
+            raise ValueError('Eigenvectors must form an orthogonal matrix')
 
         self._evals = evals
         self._evecs = evecs
@@ -213,6 +217,7 @@ class NMRTensor:
     @property
     def order(self):
         return self._order
+
     # method to update the order of the tensor
     @order.setter
     def order(self, value):
@@ -286,10 +291,11 @@ class NMRTensor:
             self._skew = _skew(self._incr_evals[None, :])[0]
         return self._skew
 
+
 def _evals_sort(
     evals: np.ndarray,
-    convention: str | TensorConvention = "i",
-    return_indices: bool = False
+    convention: str | TensorConvention = 'i',
+    return_indices: bool = False,
 ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """Sort a list of eigenvalue triplets by various conventions
 
@@ -310,13 +316,17 @@ def _evals_sort(
         return sorted_evals
     else:
         # Calculate indices by comparing original with sorted
-        indices = np.array([np.where(row == orig_row[:, None])[1]
-                          for row, orig_row in zip(sorted_evals, evals)])
+        indices = np.array(
+            [
+                np.where(row == orig_row[:, None])[1]
+                for row, orig_row in zip(sorted_evals, evals)
+            ]
+        )
         return sorted_evals, indices
 
 
 def _haeb_sort(evals, return_indices=False):
-    return _evals_sort(evals, "h", return_indices)
+    return _evals_sort(evals, 'h', return_indices)
 
 
 def _anisotropy(haeb_evals, reduced=False):
