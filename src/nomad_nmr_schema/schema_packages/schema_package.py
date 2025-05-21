@@ -281,7 +281,7 @@ class ElectricFieldGradient(PhysicalProperty):
 
         tensor = NMRTensor(np.array(self.value))
         # Using standard convention for EFG
-        tensor.order = TensorConvention.Decreasing
+        tensor.order = TensorConvention.NQR
         eigenvalues = tensor.eigenvalues
 
         # Store largest eigenvalue (Vzz)
