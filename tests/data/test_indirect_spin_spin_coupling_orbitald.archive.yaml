@@ -1,0 +1,6 @@
+data:
+  m_def: nomad_nmr_schema.schema_packages.schema_package.IndirectSpinSpinCouplingOrbitalDiamagnetic
+  value:
+  - [0.668266488662, 0.218181727154, 0.865558813641]
+  - [0.242698066773, -0.502157255302, 0.153993688058]
+  - [0.890224488098, 0.144234939067, 0.1188087574]
