@@ -48,7 +48,8 @@ def resolve_name_from_entity_ref(entities: list[Entity], logger: 'BoundLogger') 
             )
             return ''
 
-        index = ''  # ! implement here if needed
+        # index = ''  # ! implement here if needed
+        index = atoms_state.index if hasattr(atoms_state, 'index') else ''
         name += f'{atoms_state.chemical_symbol}{index}'
     return name
 
