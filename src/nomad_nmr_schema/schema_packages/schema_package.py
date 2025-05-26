@@ -320,7 +320,7 @@ class BaseIndirectSpinSpinCoupling(PhysicalProperty):
     )
 
     entity_ref_1 = Quantity(
-        type=Entity,
+        type=AtomsState,
         description="""
         Reference to the first entity that the coupling refers to. In this case, this
         is the first `AtomsState` in the pair of atoms that the coupling refers to.
@@ -328,7 +328,7 @@ class BaseIndirectSpinSpinCoupling(PhysicalProperty):
     )
 
     entity_ref_2 = Quantity(
-        type=Entity,
+        type=AtomsState,
         description="""
         Reference to the second entity that the coupling refers to. In this case, this
         is the second `AtomsState` in the pair of atoms that the coupling refers to.
