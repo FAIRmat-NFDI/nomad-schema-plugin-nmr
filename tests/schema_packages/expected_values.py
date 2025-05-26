@@ -46,5 +46,7 @@ EXPECTED_ISC_VALUE = [
 EXPECTED_ISC_DERIVED = {
     'isotropy': 33.9076,
     'anisotropy': -11.6629,
+    'reduced_anisotropy': -7.7753,
     'asymmetry': 0.0076,
+    'span': 11.6925,
 }
