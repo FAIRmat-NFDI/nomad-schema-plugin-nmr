@@ -18,22 +18,27 @@ from .tensor_utils import NMRTensor, TensorConvention
 m_package = SchemaPackage()
 
 
-def resolve_name_from_entity_ref(entities: list[Entity], logger: 'BoundLogger') -> str:
+def resolve_name_from_entity_ref(
+    entities: list[Entity], indices: list[int], logger: 'BoundLogger'
+) -> str:
     """
     Resolves the `name` of the atom-resolved `PhysicalProperty` from the `entity_ref`
     by assigning a label corresponding to the `AtomsState.chemical_symbol` and a number
     corresponding to the position in the list of `AtomsState`.
 
     Args:
-        entities (list[Entity]): The list of entities to resolve the name from.
+        entities (list[Entity]): The list of entities to resolve the site name from.
+        indices (list[int]): The list of indices to append to each site label.
         logger ('BoundLogger'): The logger to log messages.
 
     Returns:
-        (str): The resolved name of the atom-resolved `PhysicalProperty`.
+        (str): The resolved name of the atom-resolved `PhysicalProperty`. Example:
+        'H4,4' for magnetic shielding, electric field gradient or 'C2,2-H4,4' for
+        indirect spin-spin coupling to indicate the specific coupled sites.
     """
     # Initialize an empty list to store custom site label(s)
     name = []
-    for entity in entities:
+    for i, entity in enumerate(entities):
         atoms_state = entity
         # Check if `entity_ref` exists and it is an AtomsState
         if not atoms_state or not isinstance(atoms_state, AtomsState):
@@ -52,7 +57,9 @@ def resolve_name_from_entity_ref(entities: list[Entity], logger: 'BoundLogger') 
             logger.error('`AtomsState` is missing a valid `label` attribute.')
             return ''
 
-        name.append(str(atoms_state.label))
+        # Combine label and index
+        label = f'{atoms_state.label},{indices[i]}'
+        name.append(label)
     # Join the names with a hyphen, if there are multiple entities
     return '-'.join(name)
 

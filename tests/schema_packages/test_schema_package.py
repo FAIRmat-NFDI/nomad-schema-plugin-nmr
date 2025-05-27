@@ -218,11 +218,11 @@ def test_atoms_state_name_resolution_mag_shielding():
 
     # Use the resolve_name_from_entity_ref function to get the resolved name
     test_name = resolve_name_from_entity_ref(
-        [magnetic_shieldings.entity_ref], logger=None
+        [magnetic_shieldings.entity_ref], indices=[atom_data[1]], logger=None
     )
 
     # Check if the resolved name matches the expected name
-    assert test_name == 'H', f'Expected name "H", got "{test_name}"'
+    assert test_name == 'H4,4', f'Expected name "H4,4", got "{test_name}"'
 
 
 def test_atoms_state_name_resolution_isc():
@@ -249,8 +249,10 @@ def test_atoms_state_name_resolution_isc():
 
     # Use the resolve_name_from_entity_ref function to get the resolved name
     test_name = resolve_name_from_entity_ref(
-        entities=[isc.entity_ref_1, isc.entity_ref_2], logger=None
+        entities=[isc.entity_ref_1, isc.entity_ref_2],
+        indices=[atom_data[1], atom_data[3]],
+        logger=None,
     )
 
     # Check if the resolved name matches the expected name
-    assert test_name == 'C-H', f'Expected name "CH", got "{test_name}"'
+    assert test_name == 'C2,2-H4,4', f'Expected name "C2,2-H4,4", got "{test_name}"'

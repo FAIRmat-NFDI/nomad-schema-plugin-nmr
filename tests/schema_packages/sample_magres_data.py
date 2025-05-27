@@ -1,8 +1,8 @@
 # A sample data line from a raw MAGRES file for magnetic shielding
 MS_DATA = [
     [
-        'H',
-        1,
+        'H4',
+        4,
         30.2981796159,
         1.2051069281,
         3.67274492938,
@@ -17,10 +17,10 @@ MS_DATA = [
 
 ISC_DATA = [
     [
-        'C',
-        1,
-        'H',
-        1,
+        'C2',
+        2,
+        'H4',
+        4,
         30.6826678444,
         -1.62975719737,
         -5.48015039636,
