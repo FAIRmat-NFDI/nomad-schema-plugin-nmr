@@ -5,8 +5,8 @@ import numpy as np
 import pytest
 from nomad.client import normalize_all, parse
 from nomad_simulations.schema_packages.model_system import (
-    AtomicCell,
     AtomsState,
+    ModelSystem,
 )
 
 from nomad_nmr_schema.schema_packages.schema_package import (
@@ -36,7 +36,7 @@ test_files = glob.glob(os.path.join('tests', 'data', '*.archive.yaml'))
 magnetic_shielding = MagneticShielding
 indirect_spin_spin_coupling = IndirectSpinSpinCoupling
 atoms_state = AtomsState
-atomic_cell = AtomicCell
+model_system = ModelSystem
 
 
 def check_magnetic_susceptibility(data):
@@ -207,14 +207,14 @@ def test_atoms_state_name_resolution_mag_shielding():
     _, atom_data = list(enumerate(data))[0]
 
     # Create AtomsState object to represent the atom
-    atoms_state_data = atoms_state(chemical_symbol=atom_data[0])
+    atoms_state_data = atoms_state(label=atom_data[0])
 
     # Create a dummy AtomicCell and assign the AtomsState object to it
-    atomic_cell.atoms_state = [atoms_state_data]
-    atoms_state_data.m_parent = atomic_cell
+    model_system.particle_states = [atoms_state_data]
+    atoms_state_data.m_parent = model_system
 
     # Create MagneticShielding instance, referencing the atom
-    magnetic_shieldings = magnetic_shielding(entity_ref=atomic_cell.atoms_state[0])
+    magnetic_shieldings = magnetic_shielding(entity_ref=model_system.particle_states[0])
 
     # Use the resolve_name_from_entity_ref function to get the resolved name
     test_name = resolve_name_from_entity_ref(
@@ -233,18 +233,18 @@ def test_atoms_state_name_resolution_isc():
     _, atom_data = list(enumerate(data))[0]
 
     # Create AtomsState objects for both atoms involved in the coupling
-    atoms_state_1 = atoms_state(chemical_symbol=atom_data[0])
-    atoms_state_2 = atoms_state(chemical_symbol=atom_data[2])
+    atoms_state_1 = atoms_state(label=atom_data[0])
+    atoms_state_2 = atoms_state(label=atom_data[2])
 
     # Create a dummy AtomicCell and assign both AtomsState objects to it
-    atomic_cell.atoms_state = [atoms_state_1, atoms_state_2]
-    atoms_state_1.m_parent = atomic_cell
-    atoms_state_2.m_parent = atomic_cell
+    model_system.particle_states = [atoms_state_1, atoms_state_2]
+    atoms_state_1.m_parent = model_system
+    atoms_state_2.m_parent = model_system
 
     # Create a dummy IndirectSpinSpinCoupling instance, referencing both atoms
     isc = indirect_spin_spin_coupling(
-        entity_ref_1=atomic_cell.atoms_state[0],
-        entity_ref_2=atomic_cell.atoms_state[1],
+        entity_ref_1=model_system.particle_states[0],
+        entity_ref_2=model_system.particle_states[1],
     )
 
     # Use the resolve_name_from_entity_ref function to get the resolved name
@@ -253,4 +253,4 @@ def test_atoms_state_name_resolution_isc():
     )
 
     # Check if the resolved name matches the expected name
-    assert test_name == 'CH', f'Expected name "CH", got "{test_name}"'
+    assert test_name == 'C-H', f'Expected name "CH", got "{test_name}"'

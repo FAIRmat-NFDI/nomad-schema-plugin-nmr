@@ -31,7 +31,8 @@ def resolve_name_from_entity_ref(entities: list[Entity], logger: 'BoundLogger') 
     Returns:
         (str): The resolved name of the atom-resolved `PhysicalProperty`.
     """
-    name = ''
+    # Initialize an empty list to store custom site label(s)
+    name = []
     for entity in entities:
         atoms_state = entity
         # Check if `entity_ref` exists and it is an AtomsState
@@ -47,10 +48,13 @@ def resolve_name_from_entity_ref(entities: list[Entity], logger: 'BoundLogger') 
                 'The parent of the `AtomsState` in `entity_ref` does not exist.'
             )
             return ''
+        if not hasattr(atoms_state, 'label') or not atoms_state.label:
+            logger.error('`AtomsState` is missing a valid `label` attribute.')
+            return ''
 
-        index = ''  # ! implement here if needed
-        name += f'{atoms_state.chemical_symbol}{index}'
-    return name
+        name.append(str(atoms_state.label))
+    # Join the names with a hyphen, if there are multiple entities
+    return '-'.join(name)
 
 
 class MagneticShielding(PhysicalProperty):
