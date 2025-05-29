@@ -1,0 +1,9 @@
+data:
+  m_def: nomad_nmr_schema.schema_packages.schema_package.MagneticShielding
+  value:
+  - [25.6559, -0.0000, -0.0000]
+  - [-0.0000, -74.2956, 0.0000]
+  - [0.0000, -0.0000, 167.7902]
+  # entity_ref:
+  #   m_def: nomad_simulations.schema_packages.atoms_state.AtomsState
+  #   chemical_symbol: 'H'

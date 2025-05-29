@@ -1,0 +1,6 @@
+data:
+  m_def: nomad_nmr_schema.schema_packages.schema_package.IndirectSpinSpinCoupling
+  value:
+  - [30.6826678444, -1.62975719737, -5.48015039636]
+  - [-1.57659364137, 37.4487199089, -1.18603354744]
+  - [-5.44203254428, -1.20427495723, 33.5914667613]
