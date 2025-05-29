@@ -18,9 +18,7 @@ from .tensor_utils import NMRTensor, TensorConvention
 m_package = SchemaPackage()
 
 
-def resolve_name_from_entity_ref(
-    entities: list[Entity], indices: list[int], logger: 'BoundLogger'
-) -> str:
+def resolve_name_from_entity_ref(entities: list[Entity], logger: 'BoundLogger') -> str:
     """
     Resolves the `name` of the atom-resolved `PhysicalProperty` from the `entity_ref`
     by assigning a label corresponding to the `AtomsState.chemical_symbol` and a number
@@ -38,7 +36,7 @@ def resolve_name_from_entity_ref(
     """
     # Initialize an empty list to store custom site label(s)
     name = []
-    for i, entity in enumerate(entities):
+    for entity in entities:
         atoms_state = entity
         # Check if `entity_ref` exists and it is an AtomsState
         if not atoms_state or not isinstance(atoms_state, AtomsState):
@@ -58,7 +56,7 @@ def resolve_name_from_entity_ref(
             return ''
 
         # Combine label and index
-        label = f'{atoms_state.label},{indices[i]}'
+        label = f'{atoms_state.label}'
         name.append(label)
     # Join the names with a hyphen, if there are multiple entities
     return '-'.join(name)
