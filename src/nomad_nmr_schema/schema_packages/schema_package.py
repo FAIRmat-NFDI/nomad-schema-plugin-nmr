@@ -769,9 +769,7 @@ class Outputs(BaseOutputs):
         sub_section=ElectricFieldGradient.m_def, repeats=True
     )
     indirect_spin_spin_couplings = SubSection(
-
         sub_section=IndirectSpinSpinCoupling.m_def, repeats=True
-
     )
     indirect_spin_spin_couplings_fermi_contact = SubSection(
         sub_section=IndirectSpinSpinCouplingFermiContact.m_def, repeats=True
