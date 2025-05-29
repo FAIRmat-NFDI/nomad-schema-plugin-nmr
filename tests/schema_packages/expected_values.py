@@ -50,3 +50,25 @@ EXPECTED_ISC_DERIVED = {
     'asymmetry': 0.0076,
     'span': 11.6925,
 }
+
+EXPECTED_HYPERFINE_DIPOLAR_VALUE = [
+    [57.6604, -0.0020, -0.0000],
+    [-0.0020, 59.4429, 0.0010],
+    [-0.0000, 0.0010, -117.1033],
+]
+
+EXPECTED_HYPERFINE_FERMI_CONTACT_VALUE = [
+    0.140601
+]
+
+EXPECTED_DELTA_G_VALUE = [
+    [12639.98, 0.0, -0.0],
+    [0.01, 4508.84, 0.01],
+    [-0.0, 0.0, -128.9],
+]
+
+EXPECTED_DELTA_G_PARATEC_VALUE = [
+    [12351.07, 0.0, -0.0],
+    [0.01, 4383.38, 0.01],
+    [-0.0, 0.0, -143.37],
+]
