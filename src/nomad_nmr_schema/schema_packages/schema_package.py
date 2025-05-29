@@ -640,6 +640,7 @@ class DeltaG(PhysicalProperty):
     value = Quantity(
         type=np.float64,
         unit='dimensionless',
+        shape = [3, 3],
         description="""
         Variation of the electron g-factor.
         """,

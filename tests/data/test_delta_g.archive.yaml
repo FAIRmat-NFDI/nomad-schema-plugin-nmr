@@ -1,0 +1,20 @@
+data:
+  m_def: nomad_nmr_schema.schema_packages.schema_package.DeltaG
+  value:
+  - [12351.07]
+  - [0.0]
+  - [0.0]
+  - [0.01]
+  - [4383.38]
+  - [0.01]
+  - [-0.0]
+  - [0.0]
+  - [-43.37]
+
+  # - [12351.07, 0.0, -0.0]
+  # - [0.01, 4383.38, 0.01]
+  # - [-0.0, 0.0, -143.37]
+
+  # entity_ref:
+  #   m_def: nomad_simulations.schema_packages.atoms_state.AtomsState
+  #   chemical_symbol: 'H'
