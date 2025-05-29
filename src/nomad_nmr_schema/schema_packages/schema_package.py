@@ -470,7 +470,6 @@ class HyperfineFermiContact(PhysicalProperty):
         self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
     ) -> None:
         super().__init__(m_def, m_context, **kwargs)
-        self.rank = [1]  # ! move this to definitions  !!! TODO
         self.name = self.m_def.name
 
     def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
@@ -499,16 +498,10 @@ class UnpairedSpins(PhysicalProperty):
         self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
     ) -> None:
         super().__init__(m_def, m_context, **kwargs)
-        self.rank = [1]  # ! move this to definitions  !!! TODO
         self.name = self.m_def.name
 
     def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
         super().normalize(archive, logger)
-
-        # Resolve `name` to be from the `entity_ref`
-        self.name = resolve_name_from_entity_ref(
-            entities=[self.entity_ref], logger=logger
-        )
 
 
 class Outputs(BaseOutputs):
