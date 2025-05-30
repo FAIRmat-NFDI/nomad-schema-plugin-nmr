@@ -1,17 +1,19 @@
 from typing import TYPE_CHECKING
 
 import numpy as np
+from structlog.stdlib import BoundLogger
 
 if TYPE_CHECKING:
     from nomad.datamodel.datamodel import EntryArchive
     from nomad.metainfo import Context, Section
-    from structlog.stdlib import BoundLogger
 
 from nomad.datamodel.metainfo.basesections import Entity
-from nomad.metainfo import MEnum, Quantity, SchemaPackage, Section, SubSection
+from nomad.metainfo import Quantity, SchemaPackage, Section, SubSection
 from nomad_simulations.schema_packages.atoms_state import AtomsState
 from nomad_simulations.schema_packages.outputs import Outputs as BaseOutputs
 from nomad_simulations.schema_packages.physical_property import PhysicalProperty
+
+from .tensor_utils import NMRTensor, TensorConvention
 
 m_package = SchemaPackage()
 
@@ -23,13 +25,17 @@ def resolve_name_from_entity_ref(entities: list[Entity], logger: 'BoundLogger') 
     corresponding to the position in the list of `AtomsState`.
 
     Args:
-        entities (list[Entity]): The list of entities to resolve the name from.
+        entities (list[Entity]): The list of entities to resolve the site name from.
+        indices (list[int]): The list of indices to append to each site label.
         logger ('BoundLogger'): The logger to log messages.
 
     Returns:
-        (str): The resolved name of the atom-resolved `PhysicalProperty`.
+        (str): The resolved name of the atom-resolved `PhysicalProperty`. Example:
+        'H4,4' for magnetic shielding, electric field gradient or 'C2,2-H4,4' for
+        indirect spin-spin coupling to indicate the specific coupled sites.
     """
-    name = ''
+    # Initialize an empty list to store custom site label(s)
+    name = []
     for entity in entities:
         atoms_state = entity
         # Check if `entity_ref` exists and it is an AtomsState
@@ -45,13 +51,18 @@ def resolve_name_from_entity_ref(entities: list[Entity], logger: 'BoundLogger') 
                 'The parent of the `AtomsState` in `entity_ref` does not exist.'
             )
             return ''
+        if not hasattr(atoms_state, 'label') or not atoms_state.label:
+            logger.error('`AtomsState` is missing a valid `label` attribute.')
+            return ''
 
-        index = ''  # ! implement here if needed
-        name += f'{atoms_state.chemical_symbol}{index}'
-    return name
+        # Combine label and index
+        label = f'{atoms_state.label}'
+        name.append(label)
+    # Join the names with a hyphen, if there are multiple entities
+    return '-'.join(name)
 
 
-class MagneticShieldingTensor(PhysicalProperty):
+class MagneticShielding(PhysicalProperty):
     """
     Nuclear response of a material to shield the effects of an applied external field.
     This is a tensor 3x3 related with the induced magnetic field as:
@@ -64,6 +75,7 @@ class MagneticShieldingTensor(PhysicalProperty):
     correspond to an atom in the unit cell.
     The specific atom is known by defining the reference to the specific `AtomsState`
     under `ModelSystem.cell.atoms_state` using `entity_ref`.
+    TODO: these should be ppm
     """
 
     value = Quantity(
@@ -74,15 +86,99 @@ class MagneticShieldingTensor(PhysicalProperty):
         Value of the magnetic shielding tensor per atom.
         """,
     )
-    value_isotropic = Quantity(
+    isotropy = Quantity(
         type=np.float64,
         unit='dimensionless',
         description="""
-            The isotropic part of the `MagneticShieldingTensor`. This is 1/3 of the
-            trace of the magnetic shielding tensor (see `extract_isotropic_part()`
-            function in `MagneticShieldingTensor`).
+        The isotropy component of the `MagneticShielding` tensor. The isotropy
+        magnetic shielding is defined as the average of the three principal components
+        of the magnetic shielding tensor:
 
-            See, e.g, https://pubs.acs.org/doi/10.1021/cr300108a.
+            isotropy = (sigma_xx + sigma_yy + sigma_zz) / 3
+
+        where sigma_xx, sigma_yy, and sigma_zz are the eigenvalues of the magnetic
+        shielding tensor, sorted based on Haeberlen convention.
+
+        See, e.g, https://doi.org/10.1039/C6CC02542K.
+        """,
+    )
+    anisotropy = Quantity(
+        type=np.float64,
+        unit='dimensionless',
+        description="""
+        The magnetic shielding anisotropy is defined as:
+
+            anisotropy = sigma_zz - (sigma_xx + sigma_yy) / 2.0
+
+        where sigma_xx, sigma_yy, and sigma_zz are the eigenvalues of the magnetic
+        shielding tensor, sorted based on the Haeberlen convention function).
+
+        See, e.g, https://doi.org/10.1039/C6CC02542K.
+        """,
+    )
+    reduced_anisotropy = Quantity(
+        type=np.float64,
+        unit='dimensionless',
+        description="""
+        The reduced anisotropy is defined as:
+
+            reduced_anisotropy = sigma_zz - isotropy
+
+        where sigma_zz is the eigenvalue of the magnetic shielding tensor with the
+        largest deviation from the isotropy value as per Haeberlen convention.
+        For clarity, isotropy is defined as:
+
+            isotropy = (sigma_xx + sigma_yy + sigma_zz) / 3.
+
+        See, e.g, https://doi.org/10.1039/C6CC02542K.
+        """,
+    )
+    asymmetry = Quantity(
+        type=np.float64,
+        unit='dimensionless',
+        description="""
+        The magnetic shielding asymmetry is defined as:
+
+            asymmetry = (sigma_yy - sigma_xx) / reduced_anisotropy
+
+        where sigma_xx, sigma_yy, and sigma_zz are the eigenvalues of the magnetic
+        shielding tensor, sorted based on the Haeberlen convention function).
+
+            reduced_anisotropy = sigma_zz - isotropy
+
+        See, e.g, https://doi.org/10.1039/C6CC02542K.
+        """,
+    )
+    span = Quantity(
+        type=np.float64,
+        unit='dimensionless',
+        description="""
+        The span is defined as:
+
+            span = sigma_33 - sigma_11
+
+        where sigma_11, sigma_22, and sigma_33 are the eigenvalues of the magnetic
+        shielding tensor, sorted based on the standard convention function.
+
+        See, e.g, https://doi.org/10.1039/C6CC02542K.
+        """,
+    )
+
+    skew = Quantity(
+        type=np.float64,
+        unit='dimensionless',
+        description="""
+        The skew is defined as:
+
+            skew = 3 * (isotropy - sigma_22) / span
+
+        where sigma_11, sigma_22, and sigma_33 are the eigenvalues of the magnetic
+        shielding tensor, sorted based on the standard convention function.
+
+        This parameter quantifies the asymmetry of the magnetic shielding tensor around
+        its isotropy value.
+
+        See, e.g, https://doi.org/10.1039/C6CC02542K.
         """,
     )
 
@@ -90,28 +186,13 @@ class MagneticShieldingTensor(PhysicalProperty):
         self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
     ) -> None:
         super().__init__(m_def, m_context, **kwargs)
-        # ! this info is in the shape attribute of the Quantity
-        self.rank = [3, 3]
         self.name = self.m_def.name
-
-    def extract_isotropic_part(self, logger: 'BoundLogger') -> float | None:
-        """
-        Extract the isotropic part of the magnetic shielding tensor. This is 1/3 of the
-        trace of the magnetic shielding tensor `value`.
-
-        Args:
-            logger ('BoundLogger'): The logger to log messages.
-
-        Returns:
-            (Optional[float]): The isotropic part of the magnetic shielding tensor.
-        """
-        try:
-            # Calculate the isotropic value
-            isotropic = np.trace(np.array(self.value)) / 3.0
-        except Exception:
-            logger.warning('Could not extract the trace of the `value` tensor.')
-            return None
-        return isotropic
+        self.isotropy = None
+        self.anisotropy = None
+        self.reduced_anisotropy = None
+        self.asymmetry = None
+        self.span = None
+        self.skew = None
 
     def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
         super().normalize(archive, logger)
@@ -121,13 +202,30 @@ class MagneticShieldingTensor(PhysicalProperty):
             entities=[self.entity_ref], logger=logger
         )
 
-        # isotropic value extraction
-        isotropic = self.extract_isotropic_part(logger)
-        if isotropic is not None:
-            logger.info(f'Appending isotropic value for {self.name}')
-            self.value_isotropic = isotropic
-        else:
-            logger.warning(f'Isotropic value extraction failed for {self.name}')
+        # Initialise the tensor with the Haeberlen convention
+        tensor = NMRTensor(np.array(self.value), TensorConvention.Haeberlen)
+
+        # Calculate properties
+        self.isotropy = tensor.isotropy
+        self.anisotropy = tensor.anisotropy
+        self.reduced_anisotropy = tensor.reduced_anisotropy
+        self.asymmetry = tensor.asymmetry
+
+        # Log all properties
+        props = {
+            'isotropy': self.isotropy,
+            'anisotropy': self.anisotropy,
+            'reduced_anisotropy': self.reduced_anisotropy,
+            'asymmetry': self.asymmetry,
+        }
+        for prop, value in props.items():
+            logger.info(f'MS {prop} for {self.name}: {value}')
+
+        # Span and skew
+        self.span = tensor.span
+        self.skew = tensor.skew
+        logger.info(f'Magnetic Shielding Span for {self.name}: {self.span}')
+        logger.info(f'Magnetic Shielding skew for {self.name}: {self.skew}')
 
 
 class ElectricFieldGradient(PhysicalProperty):
@@ -135,57 +233,48 @@ class ElectricFieldGradient(PhysicalProperty):
     Interaction between the quadrupole moment of the nucleus and the electric field
     gradient (EFG) at the nucleus position generated by the surrounding charges.
     This property is relevant for Nuclear Magnetic Resonance (NMR). The eigenvalues
-    of these tensors can be used to compute the `quadrupolar_coupling_constant` and
-    the `asymmetry_parameter`.
+    of these tensors can be used to compute the `asymmetry_parameter`.
 
     See, e.g, https://pubs.acs.org/doi/10.1021/cr300108a.
 
-    This property will appear as a list under `Outputs` where each of the elements
-    correspond to an atom in the unit cell.
+    This class by default refers to the 'total' contribution to the EFG. This property
+    will appear as a list under `Outputs` where each of the elements correspond to an
+    atom in the unit cell.
     The specific atom is known by defining the reference to the specific `AtomsState`
     under `ModelSystem.cell.atoms_state` using `entity_ref`.
     """
 
-    type = Quantity(
-        type=MEnum('total', 'local', 'non_local'),
-        description="""
-        Type of contribution to the electric field gradient (EFG). The total EFG can be
-        decomposed on the `local` and `non_local` contributions.
-        """,
-    )
-
     value = Quantity(
         type=np.float64,
-        unit='volt / meter ** 2',
+        shape=[3, 3],
+        unit='au',
         description="""
-        Value of the electric field gradient (EFG)
-        for each `contribution` per unit area.
+        The electric field gradient (EFG) tensor. The 'au' units refer to Hartree
+        atomic units, not Rydberg atomic units.
+        """,
+    )
+    Vzz = Quantity(
+        type=np.float64,
+        unit='au',
+        description="""
+        Largest (absolute)eigenvalue of the EFG tensor. The 'au' units refer to Hartree
+        atomic units, not Rydberg atomic units.
         """,
     )
 
-    quadrupolar_coupling_constant = Quantity(
+    asymmetry = Quantity(
         type=np.float64,
+        unit='dimensionless',
         description="""
-        Quadrupolar coupling constant for each atom in the unit cell.
-        It is computed from the eigenvalues of the EFG tensor as:
+        The quadrupolar asymmetry parameter for each atom in the unit cell. It is
+        computed from the eigenvalues of the EFG tensor as:
 
-            quadrupolar_coupling_constant = efg_zz * e * Z / h
+            quadrupolar_asymmetry, eta_Q = (V_xx - V_yy) / V_zz
 
-        where efg_zz is the largest eigenvalue of the EFG tensor,
-        Z is the atomic number.
-        """,
-    )
+        where V_xx, V_yy and V_zz are the eigenvalues of the EFG tensor ordered
+        such that |V_zz| >= |V_yy| >= |V_xx|.
 
-    asymmetry_parameter = Quantity(
-        type=np.float64,
-        description="""
-        Asymmetry parameter for each atom in the unit cell. It is computed from the
-        eigenvalues of the EFG tensor as:
-
-            asymmetry_parameter = (efg_xx - efg_yy) / efg_zz
-
-        where efg_xx, efg_yy and efg_zz are the eigenvalues of the EFG tensor ordered
-        such that |efg_zz| > |efg_yy| > |efg_xx|.
+        See, e.g, https://doi.org/10.1039/C6CC02542K.
         """,
     )
 
@@ -193,14 +282,7 @@ class ElectricFieldGradient(PhysicalProperty):
         self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
     ) -> None:
         super().__init__(m_def, m_context, **kwargs)
-        self.rank = [3, 3]  # ! move this to definitions  !!! TODO
         self.name = self.m_def.name
-
-    def resolve_quadrupolar_coupling_constant(self, logger: 'BoundLogger') -> None:
-        pass
-
-    def resolve_asymmetry_parameter(self, logger: 'BoundLogger') -> None:
-        pass
 
     def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
         super().normalize(archive, logger)
@@ -210,103 +292,48 @@ class ElectricFieldGradient(PhysicalProperty):
             entities=[self.entity_ref], logger=logger
         )
 
-        # TODO add normalization to extract `quadrupolar_coupling_constant`
-        # and `asymmetry_parameter`
+        tensor = NMRTensor(np.array(self.value))
+        # Using standard convention for EFG
+        tensor.order = TensorConvention.NQR
+        eigenvalues = tensor.eigenvalues
+
+        # Store largest eigenvalue (Vzz)
+        self.Vzz = eigenvalues[2]
+        logger.info(f'Eigenvalue for {self.name}: Vzz={self.Vzz}')
+
+        # Calculate quadrupolar asymmetry
+        self.asymmetry = tensor.asymmetry
+        logger.info(f'Asymmetry for {self.name}: {self.asymmetry}')
 
 
-class ElectricFieldGradients(BaseOutputs):
+class BaseIndirectSpinSpinCoupling(PhysicalProperty):
     """
-    Represents the electric field gradients (EFG) data.
+    Base class for all indirect spin-spin coupling classes. This represents the
+    common structure
+    and behavior of various types of indirect spin-spin couplings in NMR.
 
-    This class contains the total, local, and non-local components
-    of the electric field gradients.
-    Each component is represented as a subsection of the ElectricFieldGradient class
-    and can have multiple entries.
-
-    Attributes:
-        efg_total (SubSection): A list of total electric field gradient entries.
-        efg_local (SubSection): A list of local electric field gradient entries.
-        efg_nonlocal (SubSection): A list of non-local electric field gradient entries.
+    This is used as a base for:
+    - Total indirect coupling (IndirectSpinSpinCoupling)
+    - Fermi contact contribution (IndirectSpinSpinCouplingFermiContact)
+    - Orbital paramagnetic contribution (IndirectSpinSpinCouplingOrbitalParamagnetic)
+    - Orbital diamagnetic contribution (IndirectSpinSpinCouplingOrbitalDiamagnetic)
+    - Spin dipolar contribution (IndirectSpinSpinCouplingSpinDipolar)
     """
-
-    efg_total = SubSection(sub_section=ElectricFieldGradient.m_def, repeats=True)
-    efg_local = SubSection(sub_section=ElectricFieldGradient.m_def, repeats=True)
-    efg_nonlocal = SubSection(sub_section=ElectricFieldGradient.m_def, repeats=True)
-
-
-class SpinSpinCoupling(PhysicalProperty):
-    """
-    Indirect exchanges or interactions between 2 nuclear spins that arises from
-    hyperfine interactions between the nuclei and local electrons.
-
-    This property will appear as a list under `Outputs` where each of the elements
-    correspond to an atom-atom coupling term. The specific pair of atoms defined for
-    the coupling is known by referencing the specific `AtomsState`
-    under `ModelSystem.cell.atoms_state` using `entity_ref_1` and `entity_ref_2`.
-
-    Synonyms:
-        - IndirectSpinSpinCoupling
-    """
-
-    # TODO extend this to other spin-spin coupling types besides
-    # indirect (which is useful in NMR)
 
     # we hide `entity_ref` from `PhysicalProperty` to avoid confusion
     m_def = Section(a_eln={'hide': ['entity_ref']})
 
-    type = Quantity(
-        type=MEnum(
-            'total',
-            'direct_dipolar',
-            'fermi_contact',
-            'orbital_diamagnetic',
-            'orbital_paramagnetic',
-            'spin_dipolar',
-        ),
-        description="""
-        Type of contribution to the indirect spin-spin coupling. The total indirect
-        spin-spin coupling is composed of:
-
-            `total` = `direct_dipolar` + J_coupling
-
-        Where the J_coupling is:
-            J_coupling = `fermi_contact`
-                        + `spin_dipolar`
-                        + `orbital_diamagnetic`
-                        + `orbital_paramagnetic`
-
-        See https://pubs.acs.org/doi/full/10.1021/cr300108a.
-        """,
-    )
-
     value = Quantity(
         type=np.float64,
-        unit='joule',
+        shape=[3, 3],
+        unit='tesla ** 2 / joule',
         description="""
-        Value of the indirect spin-spin couplings for each contribution.
-        """,
-    )
-
-    reduced_value = Quantity(
-        type=np.float64,
-        unit='kelvin**2 / joule',
-        shape=[3, 3],  # dynamical shape only works for `PhysicalProperty.value`
-        description="""
-        Reduced value of the indirect spin-spin couplings for each contribution.
-        It relates with the normal value as:
-
-            reduced_value = value / (gyromagnetic_ratio_i *
-                                     gyromagnetic_ratio_j *
-                                     2 *
-                                     np.pi *
-                                     hbar)
-
-        where i, j runs for each atom in the unit cell.
+        Value of the indirect spin-spin coupling tensor or one of its contributions.
         """,
     )
 
     entity_ref_1 = Quantity(
-        type=Entity,
+        type=AtomsState,
         description="""
         Reference to the first entity that the coupling refers to. In this case, this
         is the first `AtomsState` in the pair of atoms that the coupling refers to.
@@ -314,56 +341,269 @@ class SpinSpinCoupling(PhysicalProperty):
     )
 
     entity_ref_2 = Quantity(
-        type=Entity,
+        type=AtomsState,
         description="""
         Reference to the second entity that the coupling refers to. In this case, this
         is the second `AtomsState` in the pair of atoms that the coupling refers to.
         """,
     )
 
+    isotropy = Quantity(
+        type=np.float64,
+        unit='tesla ** 2 / joule',
+        description="""
+        The isotropic component of the reduced spin coupling tensor. The isotropic
+        value is defined as the average of the three principal components of the
+        reduced spin coupling tensor:
+
+            isotropy = (K_xx + K_yy + K_zz) / 3
+
+        where K_xx, K_yy, and K_zz are the eigenvalues of the reduced spin coupling
+        tensor, sorted based on Haeberlen convention.
+        """,
+    )
+
+    anisotropy = Quantity(
+        type=np.float64,
+        unit='tesla ** 2 / joule',
+        description="""
+        The reduced spin couling anisotropy is defined as:
+
+            isc_anisotropy = K_zz - (K_xx + K_yy) / 2.0
+
+        where K_xx, K_yy, and K_zz are the eigenvalues of the reduced spin coupling
+        tensor, sorted based on Haeberlen convention.
+        """,
+    )
+
+    reduced_anisotropy = Quantity(
+        type=np.float64,
+        unit='tesla ** 2 / joule',
+        description="""
+        The reduced anisotropy is defined as:
+
+            reduced_anisotropy = K_zz - isotropy
+
+        where K_xx, K_yy, and K_zz are the eigenvalues of the reduced spin coupling
+        tensor, sorted based on Haeberlen convention and isotropy is the
+        isotropic component of the tensor.
+        """,
+    )
+
+    asymmetry = Quantity(
+        type=np.float64,
+        unit='dimensionless',
+        description="""
+        The principal component asymmetry is defined as:
+
+            asymmetry = (K_yy - K_xx) / (K_zz - isotropy)
+
+        where K_xx, K_yy, and K_zz are the eigenvalues of the reduced spin coupling
+        tensor, sorted based on Haeberlen convention and isotropy is the
+        isotropic component of the tensor.
+        """,
+    )
+
+    span = Quantity(
+        type=np.float64,
+        unit='tesla ** 2 / joule',
+        description="""
+        The span is defined as:
+            span = K_33 - K_11
+
+        where K_11, K_22, and K_33 are the eigenvalues of the reduced spin coupling
+        tensor, sorted based on the standard convention.
+        The span quantifies the range of the spectrum being analysed.
+        See, e.g, https://doi.org/10.1039/C6CC02542K.
+        """,
+    )
+
     def __init__(
         self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
     ) -> None:
         super().__init__(m_def, m_context, **kwargs)
         self.rank = [3, 3]  # ! move this to definitions
-
-    def resolve_reduced_value(self, logger: 'BoundLogger') -> None:
-        pass
+        self.name = self.m_def.name
 
     def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
         super().normalize(archive, logger)
-
-        # Resolve `name` to be from the `entity_ref`
         self.name = resolve_name_from_entity_ref(
             entities=[self.entity_ref_1, self.entity_ref_2], logger=logger
         )
 
-        # TODO add normalization to extract `value` from `reduced_value`
-        # TODO add normalization to extract `reduced_value` from `value`
+        tensor = NMRTensor(np.array(self.value), order=TensorConvention.Haeberlen)
+        logger.debug(f'Tensor values for {self.name}: {tensor.values}')
+
+        # Calculate isotropic component
+        self.isotropy = tensor.isotropy
+        logger.info(f'Appending isotropy value for {self.name}: {self.isotropy}')
+
+        # Calculate anisotropy
+        self.anisotropy = tensor.anisotropy
+        logger.info(f'anisotropy for {self.name}: {self.anisotropy}')
+
+        # Calculate asymmetry
+        self.asymmetry = tensor.asymmetry
+        logger.info(f'asymmetry for {self.name}: {self.asymmetry}')
+
+
+class IndirectSpinSpinCoupling(BaseIndirectSpinSpinCoupling):
+    """
+    Indirect exchanges or interactions between 2 nuclear spins that arises from
+    hyperfine interactions between the nuclei and local electrons. This parameter is
+    identified by the 'isc' tag in the magres data block of a .magres file.
+
+
+    The total indirect coupling can be decomposed into the following contributions,
+    which can each be output by some DFT codes:
+        - Fermi contact (tag 'isc_fc' in the magres data block)
+        - Orbital paramagnetic (tag 'isc_orbital_p' in the magres data block)
+        - Orbital diamagnetic (tag 'isc_orbital_d' in the magres data block)
+        - Spin dipolar (tag 'isc_spin' in the magres data block)
+    These contributions are captured in their own classes.
+    """
+
+    value = Quantity(
+        type=np.float64,
+        shape=[3, 3],
+        unit='tesla ** 2 / joule',
+        description="""
+        The total indirect spin-spin coupling tensor output from DFT codes is called the
+        reduced spin coupling tensor K_ij, where i and j are nuclei between which the
+        coupling is computed. The K_ij tensor is obtained from the magnetic field
+        induced at nucleus i due to the perturbative effect of the magnetic moment of
+        nucleus j as:
+
+            K_ij = B_induced_i / magnetic_moment_j
+
+        where B_induced_i is the induced magnetic field at nucleus i.
+
+        Where the indirect spin-spin coupling is:
+            indirect_spin_spin_coupling = `fermi_contact`
+                                         + `spin_dipolar`
+                                         + `orbital_diamagnetic`
+                                         + `orbital_paramagnetic`
+
+        See, https://pubs.acs.org/doi/full/10.1021/cr300108a.
+        """,
+    )
+
+
+class IndirectSpinSpinCouplingFermiContact(BaseIndirectSpinSpinCoupling):
+    """
+    Represents the Fermi contact contribution to the indirect spin-spin coupling.
+    This contribution is identified by the 'isc_fc' tag in the magres data block
+    of a .magres file.
+    """
+
+    value = Quantity(
+        type=np.float64,
+        shape=[3, 3],
+        unit='tesla ** 2 / joule',
+        description="""
+        Value of the Fermi contact contribution to the indirect spin-spin coupling
+        tensor.
+        """,
+    )
+
+
+class IndirectSpinSpinCouplingOrbitalDiamagnetic(BaseIndirectSpinSpinCoupling):
+    """
+    Represents the orbital diamagnetic contribution to the indirect spin-spin coupling.
+    This contribution is identified by the 'isc_orbital_d' tag in the magres data block
+    of a .magres file.
+    """
+
+    value = Quantity(
+        type=np.float64,
+        shape=[3, 3],
+        unit='tesla ** 2 / joule',
+        description="""
+        Value of the orbital diamagnetic contribution to the indirect spin-spin coupling
+        tensor.
+        """,
+    )
+
+
+class IndirectSpinSpinCouplingOrbitalParamagnetic(BaseIndirectSpinSpinCoupling):
+    """
+    Represents the orbital paramagnetic contribution to the indirect spin-spin coupling.
+    This contribution is identified by the 'isc_orbital_p' tag in the magres data block
+    of a .magres file.
+    """
+
+    value = Quantity(
+        type=np.float64,
+        shape=[3, 3],
+        unit='tesla ** 2 / joule',
+        description="""
+        Value of the orbital paramagnetic contribution to the indirect spin-spin
+        coupling tensor.
+        """,
+    )
+
+
+class IndirectSpinSpinCouplingSpinDipolar(BaseIndirectSpinSpinCoupling):
+    """
+    Represents the spin dipolar contribution to the indirect spin-spin coupling.
+    This contribution is identified by the 'isc_spin' tag in the magres data block
+    of a .magres file.
+    """
+
+    value = Quantity(
+        type=np.float64,
+        shape=[3, 3],
+        unit='tesla ** 2 / joule',
+        description="""
+        Value of the spin dipolar contribution to the indirect spin-spin coupling
+        tensor.
+        """,
+    )
 
 
 class MagneticSusceptibility(PhysicalProperty):
     """
     Section containing the information of magnetic susceptibility tensor. Degree of
     magnetization of a material in the presence of a magnetic field.
-    """
 
-    # TODO currently only the macroscopic quantity is being supported
+    See, e.g, https://doi.org/10.1039/9781837673179-00061.
+
+    This tensor is identified by the 'sus' tag in the magres data block of a .magres
+    file.
+    """
 
     m_def = Section(validate=False)
 
-    scale_dimension = Quantity(
-        type=MEnum('microscopic', 'macroscopic'),
+    value = Quantity(
+        type=np.float64,
+        shape=[3, 3],
+        # unit='10 ** -6 * cm ** 3 / mol', # avoid adding a scaling factor in the units,
+        # any scaling may have to be done when displaying data on GUI, if so preferred.
+        unit='m ** 3 / mol',
         description="""
-        Identifier of the scale dimension of the magnetic susceptibility tensor.
+        Value of the macroscopic magnetic susceptibility tensor.
         """,
     )
 
-    value = Quantity(  # TODO extend this to microscopic contributions
+    value_vgv_approx = Quantity(
         type=np.float64,
-        unit='dimensionless',
+        shape=[3, 3],
+        unit='m ** 3 / mol',
         description="""
-        Value of the magnetic susceptibility tensor.
+        Approximate magnetic susceptibility tensor (vGv approximation). This tensor
+        is typically provided by DFT codes such as VASP and represents an approximate
+        calculation of the magnetic susceptibility.
+        """,
+    )
+
+    value_pgv_approx = Quantity(
+        type=np.float64,
+        shape=[3, 3],
+        unit='m ** 3 / mol',
+        description="""
+        Approximate magnetic susceptibility tensor (pGv approximation). This tensor
+        is typically provided by DFT codes such as VASP and represents an approximate
+        calculation of the magnetic susceptibility.
         """,
     )
 
@@ -372,9 +612,26 @@ class MagneticSusceptibility(PhysicalProperty):
     ) -> None:
         super().__init__(m_def, m_context, **kwargs)
         self.rank = [3, 3]  # ! move this to definitions
+        self.name = self.m_def.name  # Explicitly setting the name attribute
 
     def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
         super().normalize(archive, logger)
+
+        # Log information about the tensors if they are present
+        if hasattr(self, 'value') and self.value is not None:
+            logger.info(f'Magnetic susceptibility tensor for {self.name}: {self.value}')
+
+        if hasattr(self, 'value_vgv_approx') and self.value_vgv_approx is not None:
+            logger.info(
+                f'Approximate magnetic susceptibility tensor (vGv) for {self.name}: '
+                f'{self.value_vgv_approx}'
+            )
+
+        if hasattr(self, 'value_pgv_approx') and self.value_pgv_approx is not None:
+            logger.info(
+                f'Approximate magnetic susceptibility tensor (pGv) for {self.name}: '
+                f'{self.value_pgv_approx}'
+            )
 
 
 class Outputs(BaseOutputs):
@@ -382,13 +639,25 @@ class Outputs(BaseOutputs):
     The outputs of the principal metadata for NMR.
     """
 
-    magnetic_shieldings = SubSection(
-        sub_section=MagneticShieldingTensor.m_def, repeats=True
-    )
+    magnetic_shieldings = SubSection(sub_section=MagneticShielding.m_def, repeats=True)
     electric_field_gradients = SubSection(
         sub_section=ElectricFieldGradient.m_def, repeats=True
     )
-    spin_spin_couplings = SubSection(sub_section=SpinSpinCoupling.m_def, repeats=True)
+    indirect_spin_spin_couplings = SubSection(
+        sub_section=IndirectSpinSpinCoupling.m_def, repeats=True
+    )
+    indirect_spin_spin_couplings_fermi_contact = SubSection(
+        sub_section=IndirectSpinSpinCouplingFermiContact.m_def, repeats=True
+    )
+    indirect_spin_spin_couplings_orbital_p = SubSection(
+        sub_section=IndirectSpinSpinCouplingOrbitalParamagnetic.m_def, repeats=True
+    )
+    indirect_spin_spin_couplings_orbital_d = SubSection(
+        sub_section=IndirectSpinSpinCouplingOrbitalDiamagnetic.m_def, repeats=True
+    )
+    indirect_spin_spin_couplings_spin_dipolar = SubSection(
+        sub_section=IndirectSpinSpinCouplingSpinDipolar.m_def, repeats=True
+    )
     magnetic_susceptibilities = SubSection(
         sub_section=MagneticSusceptibility.m_def, repeats=True
     )

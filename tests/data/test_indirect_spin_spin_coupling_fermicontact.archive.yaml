@@ -1,0 +1,6 @@
+data:
+  m_def: nomad_nmr_schema.schema_packages.schema_package.IndirectSpinSpinCouplingFermiContact
+  value:
+  - [35.9946358421, 1.08660078313, 4.35110864214]
+  - [1.08660078175, 30.2365892665, 0.812257453852]
+  - [4.35110864168, 0.812257453841, 33.2357617836]
