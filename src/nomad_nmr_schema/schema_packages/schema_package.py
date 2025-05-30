@@ -249,13 +249,17 @@ class ElectricFieldGradient(PhysicalProperty):
         shape=[3, 3],
         unit='au',
         description="""
-        The electric field gradient (EFG) tensor.
+        The electric field gradient (EFG) tensor. The 'au' units refer to Hartree
+        atomic units, not Rydberg atomic units.
         """,
     )
     Vzz = Quantity(
         type=np.float64,
         unit='au',
-        description='Largest (absolute)eigenvalue of the EFG tensor',
+        description="""
+        Largest (absolute)eigenvalue of the EFG tensor. The 'au' units refer to Hartree
+        atomic units, not Rydberg atomic units.
+        """,
     )
 
     asymmetry = Quantity(
