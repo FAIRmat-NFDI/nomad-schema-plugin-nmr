@@ -1,0 +1,7 @@
+data:
+  m_def: nomad_nmr_schema.schema_packages.schema_package.HyperfineFermiContact
+  value:
+  - 0.140601
+  # entity_ref:
+  #   m_def: nomad_simulations.schema_packages.atoms_state.AtomsState
+  #   chemical_symbol: 'H'
