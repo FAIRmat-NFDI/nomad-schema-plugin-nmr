@@ -432,7 +432,7 @@ class BaseIndirectSpinSpinCoupling(PhysicalProperty):
         )
 
         tensor = NMRTensor(np.array(self.value), order=TensorConvention.Haeberlen)
-        logger.debug(f'Tensor values for {self.name}: {tensor.values}')
+        logger.debug(f'Tensor array for {self.name}: {np.array(self.value)}')
 
         # Calculate isotropic component
         self.isotropy = tensor.isotropy
