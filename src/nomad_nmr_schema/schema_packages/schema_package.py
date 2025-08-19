@@ -247,18 +247,20 @@ class ElectricFieldGradient(PhysicalProperty):
     value = Quantity(
         type=np.float64,
         shape=[3, 3],
-        unit='au',
+        unit='volt / meter ** 2',
         description="""
-        The electric field gradient (EFG) tensor. The 'au' units refer to Hartree
-        atomic units, not Rydberg atomic units.
+        The electric field gradient (EFG) tensor. The 'au' units from magres files refer
+        to Hartree atomic units, not Rydberg atomic units. The magres parser scales
+        tensor values by 9.717362e21 to express the tensors in 'V/m^2'.
         """,
     )
     Vzz = Quantity(
         type=np.float64,
-        unit='au',
+        unit='volt / meter ** 2',
         description="""
-        Largest (absolute)eigenvalue of the EFG tensor. The 'au' units refer to Hartree
-        atomic units, not Rydberg atomic units.
+        Largest (absolute)eigenvalue of the EFG tensor. The 'au' units from magres files refer
+        to Hartree atomic units, not Rydberg atomic units. The magres parser scales
+        tensor values by 9.717362e21 to express the tensors in 'V/m^2'.
         """,
     )
 
@@ -432,7 +434,7 @@ class BaseIndirectSpinSpinCoupling(PhysicalProperty):
         )
 
         tensor = NMRTensor(np.array(self.value), order=TensorConvention.Haeberlen)
-        logger.debug(f'Tensor values for {self.name}: {tensor.values}')
+        logger.debug(f'Tensor array for {self.name}: {np.array(self.value)}')
 
         # Calculate isotropic component
         self.isotropy = tensor.isotropy
