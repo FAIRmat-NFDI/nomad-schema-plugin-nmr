@@ -250,10 +250,12 @@ def test_schema_package(test_file):
     elif name == 'HyperfineFermiContact':
         check_hyperfine_fermi_contact(entry_archive.data)
     # Test Delta G
-    elif name == 'DeltaG':
+    elif name == 'TempDeltaG':
+    # elif name == 'DeltaG':
         check_delta_g(entry_archive.data)
     # Test Delta G a la Paratec
-    elif name == 'DeltaGParatec':
+    elif name == 'TempDeltaGParatec':
+    # elif name == 'DeltaGParatec':
         check_delta_g_paratec(entry_archive.data)
     # Test number of Unpaired Spins
     elif name == 'UnpairedSpins':
