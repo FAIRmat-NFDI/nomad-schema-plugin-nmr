@@ -668,6 +668,7 @@ class TempDeltaGParatec(PhysicalProperty):
     value = Quantity(
         type=np.float64,
         unit='dimensionless',
+        shape = [3, 3],
         description="""
         Variation of the electron g-factor a la paratec.
         """,
@@ -803,7 +804,7 @@ class Outputs(BaseOutputs):
     hyperfine_dipolar = SubSection(
         sub_section=HyperfineDipolar.m_def, repeats=True
     )
-    hyperfine_fermi = SubSection(
+    hyperfine_fermi_contact = SubSection(
         sub_section=HyperfineFermiContact.m_def, repeats=True
     )
     unpaired_spins = SubSection(
