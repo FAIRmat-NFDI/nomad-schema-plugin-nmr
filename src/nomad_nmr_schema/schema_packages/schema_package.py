@@ -792,9 +792,6 @@ class Outputs(BaseOutputs):
     magnetic_susceptibilities = SubSection(
         sub_section=MagneticSusceptibility.m_def, repeats=True
     )
-    delta_g = SubSection(
-        sub_section=DeltaG.m_def, repeats=True
-    )
     temp_delta_g = SubSection(
         sub_section=TempDeltaG.m_def, repeats=True
     )
