@@ -1,19 +1,9 @@
 data:
-  m_def: nomad_nmr_schema.schema_packages.schema_package.TempDeltaG
+  m_def: nomad_nmr_schema.schema_packages.schema_package.DeltaG
   value:
   - [12351.0700, 0.000, -0.000]
   - [0.0100, 4383.3800, 0.0100]
   - [-0.0000, 0.0000, -143.3700]
-
-  # - [12351.07]
-  # - [0.0]
-  # - [0.0]
-  # - [0.01]
-  # - [4383.38]
-  # - [0.01]
-  # - [-0.0]
-  # - [0.0]
-  # - [-43.37]
 
   # entity_ref:
   #   m_def: nomad_simulations.schema_packages.atoms_state.AtomsState

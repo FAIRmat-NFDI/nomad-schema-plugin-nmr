@@ -636,7 +636,7 @@ class MagneticSusceptibility(PhysicalProperty):
             )
 
 
-class TempDeltaG(PhysicalProperty):
+class DeltaG(PhysicalProperty):
     """
     Section containing the information of delta_g tensor.
     """
@@ -660,7 +660,7 @@ class TempDeltaG(PhysicalProperty):
         super().normalize(archive, logger)
 
 
-class TempDeltaGParatec(PhysicalProperty):
+class DeltaGParatec(PhysicalProperty):
     """
     Section containing the information of gelta_g tensor a la paratec.
     """
@@ -792,11 +792,11 @@ class Outputs(BaseOutputs):
     magnetic_susceptibilities = SubSection(
         sub_section=MagneticSusceptibility.m_def, repeats=True
     )
-    temp_delta_g = SubSection(
-        sub_section=TempDeltaG.m_def, repeats=True
+    delta_g = SubSection(
+        sub_section=DeltaG.m_def, repeats=True
     )
-    temp_delta_g_paratec = SubSection(
-        sub_section=TempDeltaGParatec.m_def, repeats=True
+    delta_g_paratec = SubSection(
+        sub_section=DeltaGParatec.m_def, repeats=True
     )
     hyperfine_dipolar = SubSection(
         sub_section=HyperfineDipolar.m_def, repeats=True
