@@ -258,9 +258,9 @@ class ElectricFieldGradient(PhysicalProperty):
         type=np.float64,
         unit='volt / meter ** 2',
         description="""
-        Largest (absolute)eigenvalue of the EFG tensor. The 'au' units from magres files refer
-        to Hartree atomic units, not Rydberg atomic units. The magres parser scales
-        tensor values by 9.717362e21 to express the tensors in 'V/m^2'.
+        Largest (absolute)eigenvalue of the EFG tensor. The 'au' units from magres files
+        refer to Hartree atomic units, not Rydberg atomic units. The magres parser
+        scales tensor values by 9.717362e21 to express the tensors in 'V/m^2'.
         """,
     )
 
@@ -644,7 +644,7 @@ class DeltaG(PhysicalProperty):
     value = Quantity(
         type=np.float64,
         unit='dimensionless',
-        shape = [3, 3],
+        shape=[3, 3],
         description="""
         Variation of the electron g-factor.
         """,
@@ -668,7 +668,7 @@ class DeltaGParatec(PhysicalProperty):
     value = Quantity(
         type=np.float64,
         unit='dimensionless',
-        shape = [3, 3],
+        shape=[3, 3],
         description="""
         Variation of the electron g-factor a la paratec.
         """,
@@ -792,20 +792,13 @@ class Outputs(BaseOutputs):
     magnetic_susceptibilities = SubSection(
         sub_section=MagneticSusceptibility.m_def, repeats=True
     )
-    delta_g = SubSection(
-        sub_section=DeltaG.m_def, repeats=True
-    )
-    delta_g_paratec = SubSection(
-        sub_section=DeltaGParatec.m_def, repeats=True
-    )
-    hyperfine_dipolar = SubSection(
-        sub_section=HyperfineDipolar.m_def, repeats=True
-    )
+    delta_g = SubSection(sub_section=DeltaG.m_def, repeats=True)
+    delta_g_paratec = SubSection(sub_section=DeltaGParatec.m_def, repeats=True)
+    hyperfine_dipolar = SubSection(sub_section=HyperfineDipolar.m_def, repeats=True)
     hyperfine_fermi_contact = SubSection(
         sub_section=HyperfineFermiContact.m_def, repeats=True
     )
-    unpaired_spins = SubSection(
-        sub_section=UnpairedSpins.m_def, repeats=True
-    )
+    unpaired_spins = SubSection(sub_section=UnpairedSpins.m_def, repeats=True)
+
 
 m_package.__init_metainfo__()
