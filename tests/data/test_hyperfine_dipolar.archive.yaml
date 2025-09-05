@@ -1,0 +1,9 @@
+data:
+  m_def: nomad_nmr_schema.schema_packages.schema_package.HyperfineDipolar
+  value:
+  - [57.6604, -0.0020, -0.0000]
+  - [-0.0020, 59.4429, 0.0010]
+  - [-0.0000, 0.0010, -117.1033]
+  # entity_ref:
+  #   m_def: nomad_simulations.schema_packages.atoms_state.AtomsState
+  #   chemical_symbol: 'H'

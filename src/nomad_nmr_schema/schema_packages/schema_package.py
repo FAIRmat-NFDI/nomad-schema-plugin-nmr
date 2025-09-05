@@ -258,9 +258,9 @@ class ElectricFieldGradient(PhysicalProperty):
         type=np.float64,
         unit='volt / meter ** 2',
         description="""
-        Largest (absolute)eigenvalue of the EFG tensor. The 'au' units from magres files refer
-        to Hartree atomic units, not Rydberg atomic units. The magres parser scales
-        tensor values by 9.717362e21 to express the tensors in 'V/m^2'.
+        Largest (absolute)eigenvalue of the EFG tensor. The 'au' units from magres files
+        refer to Hartree atomic units, not Rydberg atomic units. The magres parser
+        scales tensor values by 9.717362e21 to express the tensors in 'V/m^2'.
         """,
     )
 
@@ -636,6 +636,135 @@ class MagneticSusceptibility(PhysicalProperty):
             )
 
 
+class DeltaG(PhysicalProperty):
+    """
+    Section containing the information of delta_g tensor.
+    """
+
+    value = Quantity(
+        type=np.float64,
+        unit='dimensionless',
+        shape=[3, 3],
+        description="""
+        Variation of the electron g-factor.
+        """,
+    )
+
+    def __init__(
+        self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
+    ) -> None:
+        super().__init__(m_def, m_context, **kwargs)
+        self.rank = [3, 3]  # ! move this to definitions
+
+    def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
+        super().normalize(archive, logger)
+
+
+class DeltaGParatec(PhysicalProperty):
+    """
+    Section containing the information of gelta_g tensor a la paratec.
+    """
+
+    value = Quantity(
+        type=np.float64,
+        unit='dimensionless',
+        shape=[3, 3],
+        description="""
+        Variation of the electron g-factor a la paratec.
+        """,
+    )
+
+    def __init__(
+        self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
+    ) -> None:
+        super().__init__(m_def, m_context, **kwargs)
+        self.rank = [3, 3]  # ! move this to definitions
+
+    def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
+        super().normalize(archive, logger)
+
+
+class HyperfineDipolar(PhysicalProperty):
+    """
+    Hyperfine dipolar EPR.
+    """
+
+    value = Quantity(
+        type=np.float64,
+        unit='MHz',
+        shape=[3, 3],
+        description="""
+        Hyperfine dipolar EPR.
+        """,
+    )
+
+    def __init__(
+        self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
+    ) -> None:
+        super().__init__(m_def, m_context, **kwargs)
+        self.rank = [3, 3]  # ! move this to definitions  !!! TODO
+        self.name = self.m_def.name
+
+    def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
+        super().normalize(archive, logger)
+
+        # Resolve `name` to be from the `entity_ref`
+        self.name = resolve_name_from_entity_ref(
+            entities=[self.entity_ref], logger=logger
+        )
+
+
+class HyperfineFermiContact(PhysicalProperty):
+    """
+    Hyperfine Fermi contact EPR.
+    """
+
+    value = Quantity(
+        type=np.float64,
+        unit='MHz',
+        description="""
+        Hyperfine Fermi contact EPR.
+        """,
+    )
+
+    def __init__(
+        self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
+    ) -> None:
+        super().__init__(m_def, m_context, **kwargs)
+        self.name = self.m_def.name
+
+    def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
+        super().normalize(archive, logger)
+
+        # Resolve `name` to be from the `entity_ref`
+        self.name = resolve_name_from_entity_ref(
+            entities=[self.entity_ref], logger=logger
+        )
+
+
+class UnpairedSpins(PhysicalProperty):
+    """
+    Number of unpaired spins.
+    """
+
+    value = Quantity(
+        type=np.int64,
+        unit='dimensionless',
+        description="""
+        Number of unpaired spins.
+        """,
+    )
+
+    def __init__(
+        self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
+    ) -> None:
+        super().__init__(m_def, m_context, **kwargs)
+        self.name = self.m_def.name
+
+    def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
+        super().normalize(archive, logger)
+
+
 class Outputs(BaseOutputs):
     """
     The outputs of the principal metadata for NMR.
@@ -663,6 +792,13 @@ class Outputs(BaseOutputs):
     magnetic_susceptibilities = SubSection(
         sub_section=MagneticSusceptibility.m_def, repeats=True
     )
+    delta_g = SubSection(sub_section=DeltaG.m_def, repeats=True)
+    delta_g_paratec = SubSection(sub_section=DeltaGParatec.m_def, repeats=True)
+    hyperfine_dipolar = SubSection(sub_section=HyperfineDipolar.m_def, repeats=True)
+    hyperfine_fermi_contact = SubSection(
+        sub_section=HyperfineFermiContact.m_def, repeats=True
+    )
+    unpaired_spins = SubSection(sub_section=UnpairedSpins.m_def, repeats=True)
 
 
 m_package.__init_metainfo__()

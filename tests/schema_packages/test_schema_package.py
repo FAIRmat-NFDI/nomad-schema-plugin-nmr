@@ -19,13 +19,18 @@ from nomad_nmr_schema.schema_packages.tensor_utils import (
     TensorConvention,
 )
 from tests.schema_packages.expected_values import (
+    EXPECTED_DELTA_G_PARATEC_VALUE,
+    EXPECTED_DELTA_G_VALUE,
     EXPECTED_GRADIENT_DERIVED,
     EXPECTED_GRADIENT_VALUE,
+    EXPECTED_HYPERFINE_DIPOLAR_VALUE,
+    EXPECTED_HYPERFINE_FERMI_CONTACT_VALUE,
     EXPECTED_ISC_DERIVED,
     EXPECTED_ISC_VALUE,
     EXPECTED_MAGNETIC_SUSCEPTIBILITY_VALUE,
     EXPECTED_SHIELDING_DERIVED,
     EXPECTED_SHIELDING_VALUE,
+    EXPECTED_UNPAIRED_SPINS_VALUE,
 )
 from tests.schema_packages.sample_magres_data import (
     ISC_DATA,
@@ -178,6 +183,51 @@ def check_indirect_spin_spin_coupling(data):
     )
 
 
+def check_hyperfine_dipolar(data):
+    # Assert that the parsed hyperfine dipolar tensor matches the expected value
+    assert np.array_equal(data.value.m, EXPECTED_HYPERFINE_DIPOLAR_VALUE), (
+        f'Hyperfine Dipolar tensor mismatch: '
+        f'expected {EXPECTED_HYPERFINE_DIPOLAR_VALUE}, '
+        f'got {data.value.m}'
+    )
+
+
+def check_hyperfine_fermi_contact(data):
+    # Assert that the parsed hyperfine fermi contact scalar matches the expected value
+    assert np.equal(data.value.m, EXPECTED_HYPERFINE_FERMI_CONTACT_VALUE), (
+        f'Hyperfine Fermi Contact scalar mismatch: '
+        f'expected {EXPECTED_HYPERFINE_FERMI_CONTACT_VALUE}, '
+        f'got {data.value.m}'
+    )
+
+
+def check_delta_g(data):
+    # Assert that the parsed delta g tensor matches the expected value
+    assert np.array_equal(data.value.m, EXPECTED_DELTA_G_VALUE), (
+        f'Delta G tensor mismatch: '
+        f'expected {EXPECTED_DELTA_G_VALUE}, '
+        f'got {data.value.m}'
+    )
+
+
+def check_delta_g_paratec(data):
+    # Assert that the parsed delta g a la Paratec tensor matches the expected value
+    assert np.array_equal(data.value.m, EXPECTED_DELTA_G_PARATEC_VALUE), (
+        f'Delta G a la Paratec tensor mismatch: '
+        f'expected {EXPECTED_DELTA_G_PARATEC_VALUE}, '
+        f'got {data.value.m}'
+    )
+
+
+def check_unpaired_spins(data):
+    # Assert that the parsed number of unpaired spins matches the expected value
+    assert np.equal(data.value.m, EXPECTED_UNPAIRED_SPINS_VALUE), (
+        f'Number of Unpaired Spins mismatch: '
+        f'expected {EXPECTED_UNPAIRED_SPINS_VALUE}, '
+        f'got {data.value.m}'
+    )
+
+
 @pytest.mark.parametrize('test_file', test_files)
 def test_schema_package(test_file):
     entry_archive = parse(test_file)[0]
@@ -197,6 +247,21 @@ def test_schema_package(test_file):
     # Test Indirect Spin-Spin Coupling
     elif name == 'IndirectSpinSpinCoupling':
         check_indirect_spin_spin_coupling(entry_archive.data)
+    # Test Hyperfine Dipolar
+    elif name == 'HyperfineDipolar':
+        check_hyperfine_dipolar(entry_archive.data)
+    # Test Hyperfine Fermi Contact
+    elif name == 'HyperfineFermiContact':
+        check_hyperfine_fermi_contact(entry_archive.data)
+    # Test Delta G
+    elif name == 'DeltaG':
+        check_delta_g(entry_archive.data)
+    # Test Delta G a la Paratec
+    elif name == 'DeltaGParatec':
+        check_delta_g_paratec(entry_archive.data)
+    # Test number of Unpaired Spins
+    elif name == 'UnpairedSpins':
+        check_unpaired_spins(entry_archive.data)
 
 
 def test_atoms_state_name_resolution_mag_shielding():

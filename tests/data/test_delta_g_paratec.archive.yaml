@@ -1,0 +1,10 @@
+data:
+  m_def: nomad_nmr_schema.schema_packages.schema_package.DeltaGParatec
+  value:
+  - [12639.98, 0.0, -0.0]
+  - [0.01, 4508.84, 0.01]
+  - [-0.0, 0.0, -128.9]
+
+  # entity_ref:
+  #   m_def: nomad_simulations.schema_packages.atoms_state.AtomsState
+  #   chemical_symbol: 'H'
