@@ -134,8 +134,6 @@ where = ["src"]
 
 nmr_schema = "nomad_nmr_schema.schema_packages:nmr_schema"
 
-nmr_app = "nomad_nmr_schema.apps:nmr_app"
-
 [tool.cruft]
 # Avoid updating workflow files, this leads to permissions issues
 skip = [".github/*"]
