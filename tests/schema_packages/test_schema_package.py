@@ -90,9 +90,9 @@ def check_magnetic_shielding(data):
     assert data.skew.m == pytest.approx(EXPECTED_SHIELDING_DERIVED['skew'], abs=1e-2)
 
     # Ensure asymmetry is within the physically meaningful range [0, 1]
-    assert 0 <= data.asymmetry.m <= 1, (
-        f'Asymmetry value {data.asymmetry.m} is not between 0 and 1'
-    )
+    assert (
+        0 <= data.asymmetry.m <= 1
+    ), f'Asymmetry value {data.asymmetry.m} is not between 0 and 1'
 
 
 def check_electric_field_gradient(data):
@@ -118,9 +118,9 @@ def check_electric_field_gradient(data):
     )
 
     # Ensure asymmetry is within the physically meaningful range [0, 1]
-    assert 0 <= data.asymmetry.m <= 1, (
-        f'Asymmetry value {data.asymmetry.m} is not between 0 and 1'
-    )
+    assert (
+        0 <= data.asymmetry.m <= 1
+    ), f'Asymmetry value {data.asymmetry.m} is not between 0 and 1'
 
 
 def check_indirect_spin_spin_coupling(data):
@@ -178,9 +178,9 @@ def check_indirect_spin_spin_coupling(data):
     assert data.span.m == pytest.approx(EXPECTED_ISC_DERIVED['span'], abs=1e-2)
 
     # Ensure asymmetry is within the physically meaningful range [0, 1]
-    assert 0 <= data.asymmetry.m <= 1, (
-        f'Asymmetry value {data.asymmetry.m} is not between 0 and 1'
-    )
+    assert (
+        0 <= data.asymmetry.m <= 1
+    ), f'Asymmetry value {data.asymmetry.m} is not between 0 and 1'
 
 
 def check_hyperfine_dipolar(data):
