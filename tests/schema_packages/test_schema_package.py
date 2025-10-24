@@ -4,11 +4,6 @@ import os.path
 import numpy as np
 import pytest
 from nomad.client import normalize_all, parse
-from nomad_simulations.schema_packages.model_system import (
-    AtomsState,
-    ModelSystem,
-)
-
 from nomad_nmr_schema.schema_packages.schema_package import (
     IndirectSpinSpinCoupling,
     MagneticShielding,
@@ -18,6 +13,11 @@ from nomad_nmr_schema.schema_packages.tensor_utils import (
     NMRTensor,
     TensorConvention,
 )
+from nomad_simulations.schema_packages.model_system import (
+    AtomsState,
+    ModelSystem,
+)
+
 from tests.schema_packages.expected_values import (
     EXPECTED_DELTA_G_PARATEC_VALUE,
     EXPECTED_DELTA_G_VALUE,

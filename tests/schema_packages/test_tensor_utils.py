@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-
 from nomad_nmr_schema.schema_packages.tensor_utils import (
     NMRTensor,
     TensorConvention,
