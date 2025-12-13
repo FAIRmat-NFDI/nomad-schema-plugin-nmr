@@ -18,7 +18,9 @@ from .tensor_utils import NMRTensor, TensorConvention
 m_package = SchemaPackage()
 
 
-def resolve_name_from_entity_ref(entities: list[Entity], logger: 'BoundLogger') -> str:
+def resolve_name_from_entity_ref(
+    entities: list[Entity], indices: list[int], logger: 'BoundLogger'
+    ) -> str:
     """
     Resolves the `name` of the atom-resolved `PhysicalProperty` from the `entity_ref`
     by assigning a label corresponding to the `AtomsState.chemical_symbol` and a number
@@ -31,12 +33,12 @@ def resolve_name_from_entity_ref(entities: list[Entity], logger: 'BoundLogger') 
 
     Returns:
         (str): The resolved name of the atom-resolved `PhysicalProperty`. Example:
-        'H4,4' for magnetic shielding, electric field gradient or 'C2,2-H4,4' for
+        'H4_4' for magnetic shielding, electric field gradient or 'C2_2-H4_4' for
         indirect spin-spin coupling to indicate the specific coupled sites.
     """
     # Initialize an empty list to store custom site label(s)
     name = []
-    for entity in entities:
+    for i, entity in enumerate(entities):
         atoms_state = entity
         # Check if `entity_ref` exists and it is an AtomsState
         if not atoms_state or not isinstance(atoms_state, AtomsState):
@@ -56,7 +58,7 @@ def resolve_name_from_entity_ref(entities: list[Entity], logger: 'BoundLogger') 
             return ''
 
         # Combine label and index
-        label = f'{atoms_state.label}'
+        label = f'{atoms_state.label}_{indices[i]}'
         name.append(label)
     # Join the names with a hyphen, if there are multiple entities
     return '-'.join(name)
@@ -183,10 +185,12 @@ class MagneticShielding(PhysicalProperty):
     )
 
     def __init__(
-        self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
+        self, m_def: 'Section' = None, m_context: 'Context' = None,
+        indices = None, **kwargs
     ) -> None:
         super().__init__(m_def, m_context, **kwargs)
         self.name = self.m_def.name
+        self.indices = indices or []
         self.isotropy = None
         self.anisotropy = None
         self.reduced_anisotropy = None
@@ -199,7 +203,7 @@ class MagneticShielding(PhysicalProperty):
 
         # Resolve `name` to be from the `entity_ref`
         self.name = resolve_name_from_entity_ref(
-            entities=[self.entity_ref], logger=logger
+            entities=[self.entity_ref], indices=self.indices, logger=logger
         )
 
         # Initialise the tensor with the Haeberlen convention
@@ -281,9 +285,11 @@ class ElectricFieldGradient(PhysicalProperty):
     )
 
     def __init__(
-        self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
+        self, m_def: 'Section' = None, m_context: 'Context' = None, 
+        indices=None, **kwargs
     ) -> None:
         super().__init__(m_def, m_context, **kwargs)
+        self.indices = indices or []
         self.name = self.m_def.name
 
     def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
@@ -291,7 +297,7 @@ class ElectricFieldGradient(PhysicalProperty):
 
         # Resolve `name` to be from the `entity_ref`
         self.name = resolve_name_from_entity_ref(
-            entities=[self.entity_ref], logger=logger
+            entities=[self.entity_ref], indices=self.indices, logger=logger
         )
 
         tensor = NMRTensor(np.array(self.value))
@@ -421,16 +427,19 @@ class BaseIndirectSpinSpinCoupling(PhysicalProperty):
     )
 
     def __init__(
-        self, m_def: 'Section' = None, m_context: 'Context' = None, **kwargs
+        self, m_def: 'Section' = None, m_context: 'Context' = None,
+        indices=None, **kwargs
     ) -> None:
         super().__init__(m_def, m_context, **kwargs)
         self.rank = [3, 3]  # ! move this to definitions
         self.name = self.m_def.name
+        self.indices = indices or []
 
     def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
         super().normalize(archive, logger)
         self.name = resolve_name_from_entity_ref(
-            entities=[self.entity_ref_1, self.entity_ref_2], logger=logger
+            entities=[self.entity_ref_1, self.entity_ref_2], indices=self.indices,
+            logger=logger
         )
 
         tensor = NMRTensor(np.array(self.value), order=TensorConvention.Haeberlen)
