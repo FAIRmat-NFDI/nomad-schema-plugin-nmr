@@ -40,7 +40,8 @@ def resolve_name_from_entity_ref(
     name = []
     for entity in entities:
         atoms_state = entity
-        if not atoms_state or not hasattr(atoms_state, 'label') or not atoms_state.label:
+        if (not atoms_state or not hasattr(atoms_state, 'label') 
+            or not atoms_state.label):
             logger.error('Could not find valid label on AtomsState.')
             return ''
         name.append(atoms_state.label)
