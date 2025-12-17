@@ -19,7 +19,7 @@ m_package = SchemaPackage()
 
 
 def resolve_name_from_entity_ref(
-    entities: list[Entity], indices: list[int], logger: 'BoundLogger'
+    entities: list[Entity], logger: 'BoundLogger'
     ) -> str:
     """
     Resolves the `name` of the atom-resolved `PhysicalProperty` from the `entity_ref`
@@ -38,31 +38,13 @@ def resolve_name_from_entity_ref(
     """
     # Initialize an empty list to store custom site label(s)
     name = []
-    for i, entity in enumerate(entities):
+    for entity in entities:
         atoms_state = entity
-        # Check if `entity_ref` exists and it is an AtomsState
-        if not atoms_state or not isinstance(atoms_state, AtomsState):
-            logger.error(
-                'Could not find `entity_ref` referencing an `AtomsState` section.'
-            )
+        if not atoms_state or not hasattr(atoms_state, 'label') or not atoms_state.label:
+            logger.error('Could not find valid label on AtomsState.')
             return ''
-        # Check if the parent of `entity_ref` exists
-        cell = atoms_state.m_parent
-        if not cell:
-            logger.warning(
-                'The parent of the `AtomsState` in `entity_ref` does not exist.'
-            )
-            return ''
-        if not hasattr(atoms_state, 'label') or not atoms_state.label:
-            logger.error('`AtomsState` is missing a valid `label` attribute.')
-            return ''
-
-        # Combine label and index
-        label = f'{atoms_state.label}_{indices[i]}'
-        name.append(label)
-    # Join the names with a hyphen, if there are multiple entities
+        name.append(atoms_state.label)
     return '-'.join(name)
-
 
 class MagneticShielding(PhysicalProperty):
     """
@@ -203,7 +185,7 @@ class MagneticShielding(PhysicalProperty):
 
         # Resolve `name` to be from the `entity_ref`
         self.name = resolve_name_from_entity_ref(
-            entities=[self.entity_ref], indices=self.indices, logger=logger
+            entities=[self.entity_ref], logger=logger
         )
 
         # Initialise the tensor with the Haeberlen convention
@@ -297,7 +279,7 @@ class ElectricFieldGradient(PhysicalProperty):
 
         # Resolve `name` to be from the `entity_ref`
         self.name = resolve_name_from_entity_ref(
-            entities=[self.entity_ref], indices=self.indices, logger=logger
+            entities=[self.entity_ref], logger=logger
         )
 
         tensor = NMRTensor(np.array(self.value))
@@ -438,7 +420,7 @@ class BaseIndirectSpinSpinCoupling(PhysicalProperty):
     def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
         super().normalize(archive, logger)
         self.name = resolve_name_from_entity_ref(
-            entities=[self.entity_ref_1, self.entity_ref_2], indices=self.indices,
+            entities=[self.entity_ref_1, self.entity_ref_2],
             logger=logger
         )
 
