@@ -272,7 +272,7 @@ def test_atoms_state_name_resolution_mag_shielding():
     _, atom_data = list(enumerate(data))[0]
 
     # Create AtomsState object to represent the atom
-    atoms_state_data = atoms_state(label=atom_data[0])
+    atoms_state_data = atoms_state(label=f"{atom_data[0]}_{atom_data[1]}")
 
     # Create a dummy AtomicCell and assign the AtomsState object to it
     model_system.particle_states = [atoms_state_data]
@@ -283,7 +283,7 @@ def test_atoms_state_name_resolution_mag_shielding():
 
     # Use the resolve_name_from_entity_ref function to get the resolved name
     test_name = resolve_name_from_entity_ref(
-        [magnetic_shieldings.entity_ref], indices=[atom_data[1]], logger=None
+        [magnetic_shieldings.entity_ref], logger=None
     )
 
     # Check if the resolved name matches the expected name
@@ -297,8 +297,8 @@ def test_atoms_state_name_resolution_isc():
     _, atom_data = list(enumerate(data))[0]
 
     # Create AtomsState objects for both atoms involved in the coupling
-    atoms_state_1 = atoms_state(label=atom_data[0])
-    atoms_state_2 = atoms_state(label=atom_data[2])
+    atoms_state_1 = atoms_state(label=f"{atom_data[0]}_{atom_data[1]}")
+    atoms_state_2 = atoms_state(label=f"{atom_data[2]}_{atom_data[3]}")
 
     # Create a dummy AtomicCell and assign both AtomsState objects to it
     model_system.particle_states = [atoms_state_1, atoms_state_2]
@@ -314,7 +314,6 @@ def test_atoms_state_name_resolution_isc():
     # Use the resolve_name_from_entity_ref function to get the resolved name
     test_name = resolve_name_from_entity_ref(
         entities=[isc.entity_ref_1, isc.entity_ref_2],
-        indices=[atom_data[1], atom_data[3]],
         logger=None,
     )
 
