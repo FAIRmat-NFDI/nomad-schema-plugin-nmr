@@ -60,20 +60,19 @@ class MagneticShielding(PhysicalProperty):
     correspond to an atom in the unit cell.
     The specific atom is known by defining the reference to the specific `AtomsState`
     under `ModelSystem.cell.atoms_state` using `entity_ref`.
-    TODO: these should be ppm
     """
 
     value = Quantity(
         type=np.float64,
         shape=[3, 3],
-        unit='dimensionless',
+        unit='ppm',
         description="""
         Value of the magnetic shielding tensor per atom.
         """,
     )
     isotropy = Quantity(
         type=np.float64,
-        unit='dimensionless',
+        unit='ppm',
         description="""
         The isotropy component of the `MagneticShielding` tensor. The isotropy
         magnetic shielding is defined as the average of the three principal components
@@ -89,7 +88,7 @@ class MagneticShielding(PhysicalProperty):
     )
     anisotropy = Quantity(
         type=np.float64,
-        unit='dimensionless',
+        unit='ppm',
         description="""
         The magnetic shielding anisotropy is defined as:
 
@@ -103,7 +102,7 @@ class MagneticShielding(PhysicalProperty):
     )
     reduced_anisotropy = Quantity(
         type=np.float64,
-        unit='dimensionless',
+        unit='ppm',
         description="""
         The reduced anisotropy is defined as:
 
@@ -136,7 +135,7 @@ class MagneticShielding(PhysicalProperty):
     )
     span = Quantity(
         type=np.float64,
-        unit='dimensionless',
+        unit='ppm',
         description="""
         The span is defined as:
 
