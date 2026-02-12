@@ -233,7 +233,7 @@ class ElectricFieldGradient(PhysicalProperty):
     value = Quantity(
         type=np.float64,
         shape=[3, 3],
-        unit='hartree / bohr ** 2 / elementary_charge',
+        unit='a_u_efg',
         description="""
         The electric field gradient (EFG) tensor in Hartree atomic units.
         The 'au' units from magres files refer to Hartree atomic units, not Rydberg
@@ -242,7 +242,7 @@ class ElectricFieldGradient(PhysicalProperty):
     )
     Vzz = Quantity(
         type=np.float64,
-        unit='hartree / bohr ** 2 / elementary_charge',
+        unit='a_u_efg',
         description="""
         Largest (absolute) eigenvalue of the EFG tensor in Hartree atomic units.
         The 'au' units from magres files refer to Hartree atomic units, not Rydberg
