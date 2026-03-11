@@ -24,8 +24,9 @@ from nomad_nmr_schema.schema_packages.tensor_utils import (
 from tests.schema_packages.expected_values import (
     EXPECTED_DELTA_G_PARATEC_VALUE,
     EXPECTED_DELTA_G_VALUE,
-    EXPECTED_GRADIENT_DERIVED,
-    EXPECTED_GRADIENT_VALUE,
+    # TODO: Re-enable when EFG tests are uncommented
+    # EXPECTED_GRADIENT_DERIVED,
+    # EXPECTED_GRADIENT_VALUE,
     EXPECTED_HYPERFINE_DIPOLAR_VALUE,
     EXPECTED_HYPERFINE_FERMI_CONTACT_VALUE,
     EXPECTED_ISC_DERIVED,
