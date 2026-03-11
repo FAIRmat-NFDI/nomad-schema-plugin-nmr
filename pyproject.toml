@@ -46,6 +46,11 @@ dev = [
     "pydantic>=2.0,<2.11",
     "python-logstash"
 ]
+# remove marker when 'a_u_efg' is adde dto nomad-lab as EFG unit
+[tool.pytest.ini_options]
+markers = [
+    "efg: marks tests related to ElectricFieldGradient functionality"
+]
 
 [tool.uv]
 extra-index-url = [

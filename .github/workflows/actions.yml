@@ -16,7 +16,7 @@ jobs:
         uv sync --all-extras
     - name: Test with pytest
       run: |
-        uv run --with coverage coverage run -m pytest -sv
+        uv run --with coverage coverage run -m pytest -sv -m "not efg" #remove -m when 'a_u_efg' available in nomad-lab
     - name: Submit to coveralls
       continue-on-error: true
       env:

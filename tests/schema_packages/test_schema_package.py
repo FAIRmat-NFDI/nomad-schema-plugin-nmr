@@ -14,6 +14,15 @@ from nomad_nmr_schema.schema_packages.schema_package import (
     MagneticShielding,
     resolve_name_from_entity_ref,
 )
+
+# Revert previous import when 'a_u_efg' unit is added to nomad-lab
+# Conditional import for ElectricFieldGradient to handle missing 'a_u_efg' unit
+try:
+    from nomad_nmr_schema.schema_packages.schema_package import ElectricFieldGradient
+    HAS_EFG = True
+except ImportError:
+    HAS_EFG = False
+    ElectricFieldGradient = None
 from nomad_nmr_schema.schema_packages.tensor_utils import (
     NMRTensor,
     TensorConvention,
@@ -95,6 +104,13 @@ def check_magnetic_shielding(data):
     )
 
 
+# Remove markers when 'a_u_efg' unit is added to nomad-lab and
+# ElectricFieldGradient functionality is available
+@pytest.mark.efg
+@pytest.mark.skipif(
+    not HAS_EFG,
+    reason="ElectricFieldGradient not available due to missing 'a_u_efg' unit"
+)
 def check_electric_field_gradient(data):
     # Assert that the parsed magnetic shielding tensor matches the expected value
     assert np.array_equal(data.value.m, EXPECTED_GRADIENT_VALUE), (
@@ -243,6 +259,12 @@ def test_schema_package(test_file):
         check_magnetic_shielding(entry_archive.data)
     # Test Electric Field Gradient
     elif name == 'ElectricFieldGradient':
+        # Remove skip condition when 'a_u_efg' unit is added to nomad-lab and
+        # ElectricFieldGradient functionality is available
+        if not HAS_EFG:
+            pytest.skip(
+                "ElectricFieldGradient not available due to missing 'a_u_efg' unit"
+            )
         check_electric_field_gradient(entry_archive.data)
     # Test Indirect Spin-Spin Coupling
     elif name == 'IndirectSpinSpinCoupling':
