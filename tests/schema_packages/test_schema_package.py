@@ -15,14 +15,8 @@ from nomad_nmr_schema.schema_packages.schema_package import (
     resolve_name_from_entity_ref,
 )
 
-# Revert previous import when 'a_u_efg' unit is added to nomad-lab
-# Conditional import for ElectricFieldGradient to handle missing 'a_u_efg' unit
-try:
-    from nomad_nmr_schema.schema_packages.schema_package import ElectricFieldGradient
-    HAS_EFG = True
-except ImportError:
-    HAS_EFG = False
-    ElectricFieldGradient = None
+# TODO: Re-enable when 'a_u_efg' unit is available in nomad-lab
+# from nomad_nmr_schema.schema_packages.schema_package import ElectricFieldGradient
 from nomad_nmr_schema.schema_packages.tensor_utils import (
     NMRTensor,
     TensorConvention,
@@ -104,39 +98,33 @@ def check_magnetic_shielding(data):
     )
 
 
-# Remove markers when 'a_u_efg' unit is added to nomad-lab and
-# ElectricFieldGradient functionality is available
-@pytest.mark.efg
-@pytest.mark.skipif(
-    not HAS_EFG,
-    reason="ElectricFieldGradient not available due to missing 'a_u_efg' unit"
-)
-def check_electric_field_gradient(data):
-    # Assert that the parsed magnetic shielding tensor matches the expected value
-    assert np.array_equal(data.value.m, EXPECTED_GRADIENT_VALUE), (
-        f'Electric Field Gradient tensor mismatch: '
-        f'expected {EXPECTED_GRADIENT_VALUE}, got {data.value.m}'
-    )
-
-    # Convert the tensor to a numpy array and create an NMRTensor for derived property
-    # calculations
-    matrix = np.array(data.value.m, dtype=float)
-    tensor = NMRTensor(matrix, TensorConvention.NQR)
-
-    # Assign derived tensor properties to the data object for further checks
-    data.Vzz = tensor.eigenvalues[2]
-    data.asymmetry = tensor.asymmetry
-
-    # Assert that all derived properties match the expected values within a tolerance
-    assert data.Vzz.m == pytest.approx(EXPECTED_GRADIENT_DERIVED['Vzz'], abs=1e-2)
-    assert data.asymmetry.m == pytest.approx(
-        EXPECTED_GRADIENT_DERIVED['asymmetry'], abs=1e-2
-    )
-
-    # Ensure asymmetry is within the physically meaningful range [0, 1]
-    assert 0 <= data.asymmetry.m <= 1, (
-        f'Asymmetry value {data.asymmetry.m} is not between 0 and 1'
-    )
+# TODO: Re-enable when 'a_u_efg' unit is available in nomad-lab  
+# def check_electric_field_gradient(data):
+#     # Assert that the parsed magnetic shielding tensor matches the expected value
+#     assert np.array_equal(data.value.m, EXPECTED_GRADIENT_VALUE), (
+#         f'Electric Field Gradient tensor mismatch: '
+#         f'expected {EXPECTED_GRADIENT_VALUE}, got {data.value.m}'
+#     )
+# 
+#     # Convert the tensor to a numpy array and create an NMRTensor for derived property
+#     # calculations
+#     matrix = np.array(data.value.m, dtype=float)
+#     tensor = NMRTensor(matrix, TensorConvention.NQR)
+# 
+#     # Assign derived tensor properties to the data object for further checks
+#     data.Vzz = tensor.eigenvalues[2]
+#     data.asymmetry = tensor.asymmetry
+# 
+#     # Assert that all derived properties match the expected values within a tolerance
+#     assert data.Vzz.m == pytest.approx(EXPECTED_GRADIENT_DERIVED['Vzz'], abs=1e-2)
+#     assert data.asymmetry.m == pytest.approx(
+#         EXPECTED_GRADIENT_DERIVED['asymmetry'], abs=1e-2
+#     )
+# 
+#     # Ensure asymmetry is within the physically meaningful range [0, 1]
+#     assert 0 <= data.asymmetry.m <= 1, (
+#         f'Asymmetry value {data.asymmetry.m} is not between 0 and 1'
+#     )
 
 
 def check_indirect_spin_spin_coupling(data):
@@ -257,15 +245,10 @@ def test_schema_package(test_file):
     # Test Magnetic Shielding
     elif name == 'MagneticShielding':
         check_magnetic_shielding(entry_archive.data)
-    # Test Electric Field Gradient
-    elif name == 'ElectricFieldGradient':
-        # Remove skip condition when 'a_u_efg' unit is added to nomad-lab and
-        # ElectricFieldGradient functionality is available
-        if not HAS_EFG:
-            pytest.skip(
-                "ElectricFieldGradient not available due to missing 'a_u_efg' unit"
-            )
-        check_electric_field_gradient(entry_archive.data)
+    # TODO: Re-enable when 'a_u_efg' unit is available in nomad-lab
+    # # Test Electric Field Gradient  
+    # elif name == 'ElectricFieldGradient':
+    #     check_electric_field_gradient(entry_archive.data)
     # Test Indirect Spin-Spin Coupling
     elif name == 'IndirectSpinSpinCoupling':
         check_indirect_spin_spin_coupling(entry_archive.data)
