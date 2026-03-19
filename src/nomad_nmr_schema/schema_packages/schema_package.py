@@ -66,6 +66,7 @@ class MagneticShielding(PhysicalProperty):
         type=np.float64,
         shape=[3, 3],
         unit='ppm',
+        a_eln=dict(defaultDisplayUnit='ppm'),
         description="""
         Value of the magnetic shielding tensor per atom.
         """,
@@ -73,6 +74,7 @@ class MagneticShielding(PhysicalProperty):
     isotropy = Quantity(
         type=np.float64,
         unit='ppm',
+        a_eln=dict(defaultDisplayUnit='ppm'),
         description="""
         The isotropy component of the `MagneticShielding` tensor. The isotropy
         magnetic shielding is defined as the average of the three principal components
@@ -89,6 +91,7 @@ class MagneticShielding(PhysicalProperty):
     anisotropy = Quantity(
         type=np.float64,
         unit='ppm',
+        a_eln=dict(defaultDisplayUnit='ppm'),
         description="""
         The magnetic shielding anisotropy is defined as:
 
@@ -103,6 +106,7 @@ class MagneticShielding(PhysicalProperty):
     reduced_anisotropy = Quantity(
         type=np.float64,
         unit='ppm',
+        a_eln=dict(defaultDisplayUnit='ppm'),
         description="""
         The reduced anisotropy is defined as:
 
@@ -136,6 +140,7 @@ class MagneticShielding(PhysicalProperty):
     span = Quantity(
         type=np.float64,
         unit='ppm',
+        a_eln=dict(defaultDisplayUnit='ppm'),
         description="""
         The span is defined as:
 
