@@ -14,7 +14,7 @@ classifiers = [
 ]
 name = "nomad-nmr-schema"
 description = "Schema plugin containing shared classes for NMR metadata"
-version = "0.1.0"
+dynamic = ["version"]
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
@@ -120,6 +120,8 @@ skip-magic-trailing-comma = false
 
 # Like Black, automatically detect the appropriate line ending.
 line-ending = "auto"
+
+[tool.setuptools_scm]
 
 [tool.setuptools]
 package-dir = { "" = "src" }
