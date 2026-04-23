@@ -16,7 +16,7 @@ jobs:
         uv sync --all-extras
     - name: Test with pytest
       run: |
-        uv run --with coverage coverage run -m pytest -sv --ignore=tests/schema_packages/test_schema_package.py
+        uv run --with coverage coverage run -m pytest -sv
     - name: Submit to coveralls
       continue-on-error: true
       env:
