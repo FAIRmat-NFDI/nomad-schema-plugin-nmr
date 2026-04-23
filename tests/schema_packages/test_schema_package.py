@@ -14,8 +14,6 @@ from nomad_nmr_schema.schema_packages.schema_package import (
     MagneticShielding,
     resolve_name_from_entity_ref,
 )
-
-from nomad_nmr_schema.schema_packages.schema_package import ElectricFieldGradient
 from nomad_nmr_schema.schema_packages.tensor_utils import (
     NMRTensor,
     TensorConvention,
@@ -128,7 +126,7 @@ def check_electric_field_gradient(data):
 def check_indirect_spin_spin_coupling(data):
     # Assert that the parsed magnetic shielding tensor matches the expected value
     assert np.array_equal(data.value.m, EXPECTED_ISC_VALUE), (
-        f'Electric Field Gradient tensor mismatch: '
+        f'Indirect Spin-Spin Coupling tensor mismatch: '
         f'expected {EXPECTED_ISC_VALUE}, got {data.value.m}'
     )
 
