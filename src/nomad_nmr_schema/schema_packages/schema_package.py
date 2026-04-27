@@ -60,20 +60,21 @@ class MagneticShielding(PhysicalProperty):
     correspond to an atom in the unit cell.
     The specific atom is known by defining the reference to the specific `AtomsState`
     under `ModelSystem.cell.atoms_state` using `entity_ref`.
-    TODO: these should be ppm
     """
 
     value = Quantity(
         type=np.float64,
         shape=[3, 3],
-        unit='dimensionless',
+        unit='ppm',
+        a_eln=dict(defaultDisplayUnit='ppm'),
         description="""
         Value of the magnetic shielding tensor per atom.
         """,
     )
     isotropy = Quantity(
         type=np.float64,
-        unit='dimensionless',
+        unit='ppm',
+        a_eln=dict(defaultDisplayUnit='ppm'),
         description="""
         The isotropy component of the `MagneticShielding` tensor. The isotropy
         magnetic shielding is defined as the average of the three principal components
@@ -89,7 +90,8 @@ class MagneticShielding(PhysicalProperty):
     )
     anisotropy = Quantity(
         type=np.float64,
-        unit='dimensionless',
+        unit='ppm',
+        a_eln=dict(defaultDisplayUnit='ppm'),
         description="""
         The magnetic shielding anisotropy is defined as:
 
@@ -103,7 +105,8 @@ class MagneticShielding(PhysicalProperty):
     )
     reduced_anisotropy = Quantity(
         type=np.float64,
-        unit='dimensionless',
+        unit='ppm',
+        a_eln=dict(defaultDisplayUnit='ppm'),
         description="""
         The reduced anisotropy is defined as:
 
@@ -136,7 +139,8 @@ class MagneticShielding(PhysicalProperty):
     )
     span = Quantity(
         type=np.float64,
-        unit='dimensionless',
+        unit='ppm',
+        a_eln=dict(defaultDisplayUnit='ppm'),
         description="""
         The span is defined as:
 
@@ -234,20 +238,20 @@ class ElectricFieldGradient(PhysicalProperty):
     value = Quantity(
         type=np.float64,
         shape=[3, 3],
-        unit='volt / meter ** 2',
+        unit='a_u_efg',
         description="""
-        The electric field gradient (EFG) tensor. The 'au' units from magres files refer
-        to Hartree atomic units, not Rydberg atomic units. The magres parser scales
-        tensor values by 9.717362e21 to express the tensors in 'V/m^2'.
+        The electric field gradient (EFG) tensor in Hartree atomic units.
+        The 'au' units from magres files refer to Hartree atomic units, not Rydberg
+        atomic units.
         """,
     )
     Vzz = Quantity(
         type=np.float64,
-        unit='volt / meter ** 2',
+        unit='a_u_efg',
         description="""
-        Largest (absolute)eigenvalue of the EFG tensor. The 'au' units from magres files
-        refer to Hartree atomic units, not Rydberg atomic units. The magres parser
-        scales tensor values by 9.717362e21 to express the tensors in 'V/m^2'.
+        Largest (absolute) eigenvalue of the EFG tensor in Hartree atomic units.
+        The 'au' units from magres files refer to Hartree atomic units, not Rydberg
+        atomic units.
         """,
     )
 

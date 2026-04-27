@@ -4,7 +4,7 @@ NMR tensor as well as its representation in multiple conventions
 """
 
 import warnings
-from enum import Enum
+from enum import StrEnum
 
 import numpy as np
 
@@ -17,7 +17,7 @@ TENSOR_DIMENSION: int = 3
 EIGENVALUE_TRIPLET_SIZE: int = 2
 
 
-class TensorConvention(str, Enum):
+class TensorConvention(StrEnum):
     Haeberlen = 'h'
     Increasing = 'i'
     Decreasing = 'd'

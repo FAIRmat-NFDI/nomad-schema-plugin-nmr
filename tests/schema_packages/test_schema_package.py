@@ -126,7 +126,7 @@ def check_electric_field_gradient(data):
 def check_indirect_spin_spin_coupling(data):
     # Assert that the parsed magnetic shielding tensor matches the expected value
     assert np.array_equal(data.value.m, EXPECTED_ISC_VALUE), (
-        f'Electric Field Gradient tensor mismatch: '
+        f'Indirect Spin-Spin Coupling tensor mismatch: '
         f'expected {EXPECTED_ISC_VALUE}, got {data.value.m}'
     )
 
@@ -241,7 +241,7 @@ def test_schema_package(test_file):
     # Test Magnetic Shielding
     elif name == 'MagneticShielding':
         check_magnetic_shielding(entry_archive.data)
-    # Test Electric Field Gradient
+    # Test Electric Field Gradient  
     elif name == 'ElectricFieldGradient':
         check_electric_field_gradient(entry_archive.data)
     # Test Indirect Spin-Spin Coupling
