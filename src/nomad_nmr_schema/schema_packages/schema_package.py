@@ -202,21 +202,21 @@ class MagneticShielding(PhysicalProperty):
         self.reduced_anisotropy = tensor.reduced_anisotropy
         self.asymmetry = tensor.asymmetry
 
-        # # Log all properties
-        # props = {
-        #     'isotropy': self.isotropy,
-        #     'anisotropy': self.anisotropy,
-        #     'reduced_anisotropy': self.reduced_anisotropy,
-        #     'asymmetry': self.asymmetry,
-        # }
-        # for prop, value in props.items():
-            # logger.info(f'MS {prop} for {self.name}: {value}')
+        # Log all properties
+        props = {
+            'isotropy': self.isotropy,
+            'anisotropy': self.anisotropy,
+            'reduced_anisotropy': self.reduced_anisotropy,
+            'asymmetry': self.asymmetry,
+        }
+        for prop, value in props.items():
+            logger.debug(f'MS {prop} for {self.name}: {value}')
 
         # Span and skew
         self.span = tensor.span
         self.skew = tensor.skew
-        # logger.info(f'Magnetic Shielding Span for {self.name}: {self.span}')
-        # logger.info(f'Magnetic Shielding skew for {self.name}: {self.skew}')
+        logger.debug(f'Magnetic Shielding Span for {self.name}: {self.span}')
+        logger.debug(f'Magnetic Shielding skew for {self.name}: {self.skew}')
 
 
 class ElectricFieldGradient(PhysicalProperty):
@@ -294,11 +294,11 @@ class ElectricFieldGradient(PhysicalProperty):
 
         # Store largest eigenvalue (Vzz)
         self.Vzz = eigenvalues[2]
-        # logger.info(f'Eigenvalue for {self.name}: Vzz={self.Vzz}')
+        logger.debug(f'Eigenvalue for {self.name}: Vzz={self.Vzz}')
 
         # Calculate quadrupolar asymmetry
         self.asymmetry = tensor.asymmetry
-        # logger.info(f'Asymmetry for {self.name}: {self.asymmetry}')
+        logger.debug(f'Asymmetry for {self.name}: {self.asymmetry}')
 
 
 class BaseIndirectSpinSpinCoupling(PhysicalProperty):
@@ -434,15 +434,15 @@ class BaseIndirectSpinSpinCoupling(PhysicalProperty):
 
         # Calculate isotropic component
         self.isotropy = tensor.isotropy
-        # logger.info(f'Appending isotropy value for {self.name}: {self.isotropy}')
+        logger.debug(f'Appending isotropy value for {self.name}: {self.isotropy}')
 
         # Calculate anisotropy
         self.anisotropy = tensor.anisotropy
-        # logger.info(f'anisotropy for {self.name}: {self.anisotropy}')
+        logger.debug(f'anisotropy for {self.name}: {self.anisotropy}')
 
         # Calculate asymmetry
         self.asymmetry = tensor.asymmetry
-        # logger.info(f'asymmetry for {self.name}: {self.asymmetry}')
+        logger.debug(f'asymmetry for {self.name}: {self.asymmetry}')
 
 
 class IndirectSpinSpinCoupling(BaseIndirectSpinSpinCoupling):
@@ -616,21 +616,22 @@ class MagneticSusceptibility(PhysicalProperty):
         super().normalize(archive, logger)
 
         # Log information about the tensors if they are present
-        # if hasattr(self, 'value') and self.value is not None:
-        #     logger.info(f'Magnetic susceptibility tensor for {self.name}: 
-        # {self.value}')
+        if hasattr(self, 'value') and self.value is not None:
+            logger.debug(
+                f'Magnetic susceptibility tensor for {self.name}: {self.value}'
+            )
 
-        # if hasattr(self, 'value_vgv_approx') and self.value_vgv_approx is not None:
-        #     logger.info(
-        #         f'Approximate magnetic susceptibility tensor (vGv) for {self.name}: '
-        #         f'{self.value_vgv_approx}'
-        #     )
+        if hasattr(self, 'value_vgv_approx') and self.value_vgv_approx is not None:
+            logger.debug(
+                f'Approximate magnetic susceptibility tensor (vGv) for {self.name}: '
+                f'{self.value_vgv_approx}'
+            )
 
-        # if hasattr(self, 'value_pgv_approx') and self.value_pgv_approx is not None:
-        #     logger.info(
-        #         f'Approximate magnetic susceptibility tensor (pGv) for {self.name}: '
-        #         f'{self.value_pgv_approx}'
-        #     )
+        if hasattr(self, 'value_pgv_approx') and self.value_pgv_approx is not None:
+            logger.debug(
+                f'Approximate magnetic susceptibility tensor (pGv) for {self.name}: '
+                f'{self.value_pgv_approx}'
+            )
 
 
 class DeltaG(PhysicalProperty):
