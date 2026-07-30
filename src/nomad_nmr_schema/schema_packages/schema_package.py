@@ -202,13 +202,13 @@ class MagneticShielding(PhysicalProperty):
         self.reduced_anisotropy = tensor.reduced_anisotropy
         self.asymmetry = tensor.asymmetry
 
-        # Log all properties
-        props = {
-            'isotropy': self.isotropy,
-            'anisotropy': self.anisotropy,
-            'reduced_anisotropy': self.reduced_anisotropy,
-            'asymmetry': self.asymmetry,
-        }
+        # # Log all properties
+        # props = {
+        #     'isotropy': self.isotropy,
+        #     'anisotropy': self.anisotropy,
+        #     'reduced_anisotropy': self.reduced_anisotropy,
+        #     'asymmetry': self.asymmetry,
+        # }
         # for prop, value in props.items():
             # logger.info(f'MS {prop} for {self.name}: {value}')
 
@@ -617,7 +617,8 @@ class MagneticSusceptibility(PhysicalProperty):
 
         # Log information about the tensors if they are present
         # if hasattr(self, 'value') and self.value is not None:
-        #     logger.info(f'Magnetic susceptibility tensor for {self.name}: {self.value}')
+        #     logger.info(f'Magnetic susceptibility tensor for {self.name}: 
+        # {self.value}')
 
         # if hasattr(self, 'value_vgv_approx') and self.value_vgv_approx is not None:
         #     logger.info(
